@@ -74,6 +74,13 @@ def sign_in(driver):
     except Exception as e:
         print(f"An error occurred: {e}")
         
+def set_flight_alert(driver):
+    try:
+        set_alert_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[2]/span[2]/span[2]/button/span'
+        click_element(driver, set_alert_xpath)
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
         
 def main():
     # Load environment variables from .env file
@@ -91,6 +98,7 @@ def main():
     for origin, destination in routes:
         setup_search_page(driver, origin, destination)     
         sign_in(driver)
+        set_flight_alert(driver)
         time.sleep(500)  # Wait a bit before setting up the next alert
 
     driver.quit()
