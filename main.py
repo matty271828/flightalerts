@@ -1,8 +1,9 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
 import time
+
+from element_interactions import click_element, enter_text
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 
 def setup_search_page(driver, origin, destination):
     time.sleep(2)  # Wait for the page to load
@@ -49,29 +50,6 @@ def setup_search_page(driver, origin, destination):
     except Exception as e:
         print(f"An error occurred: {e}")
         
-def click_element(driver, xpath):
-    """Clicks on the element specified by the given XPath."""
-    wait_time = 1
-    try:
-        element = driver.find_element(By.XPATH, xpath)
-        element.click()
-        time.sleep(wait_time)  # Wait for the action to complete
-        print(f"Element clicked successfully: {xpath}")
-    except Exception as e:
-        print(f"An error occurred while clicking element: {xpath}, Error: {e}")
-        
-def enter_text(driver, xpath, text):
-    """Enters the given text into the element specified by the given XPath."""
-    wait_time=1
-    try:
-        element = driver.find_element(By.XPATH, xpath)
-        element.clear()  # Clear any pre-existing text
-        element.send_keys(text)
-        time.sleep(wait_time)  # Wait for the action to complete
-        print(f"Text '{text}' entered successfully in element: {xpath}")
-    except Exception as e:
-        print(f"An error occurred while entering text: {xpath}, Error: {e}")
-
 def main():
     # Setup ChromeDriver path
     service = Service('/opt/homebrew/Caskroom/chromedriver/127.0.6533.72/chromedriver-mac-arm64/chromedriver')
