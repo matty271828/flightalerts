@@ -9,44 +9,55 @@ def set_flight_alert(driver, origin, destination):
     try:
         # Click the cookies "Accept All" button
         accept_cookies_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button/span'
-        accept_cookies_button = driver.find_element(By.XPATH, accept_cookies_xpath)
-        accept_cookies_button.click()
-        time.sleep(1)  # Wait for the action to complete
-        print("Cookies 'Accept All' button clicked successfully.")
+        click_element(driver, accept_cookies_xpath)
+        
+        # Select one way flight
+        trip_type_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div/div/div[1]/div'
+        click_element(driver, trip_type_xpath)
+        
+        one_way_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div/div/div[2]/ul/li[2]'
+        click_element(driver, one_way_xpath)
         
         # Enter the destination
         destination_input_xpath = '//*[@id="i23"]/div[4]/div/div/div[1]/div/div/input'
-        destination_input = driver.find_element(By.XPATH, destination_input_xpath)
-        destination_input.clear()  # Clear any pre-existing text
-        destination_input.send_keys(destination)
-        time.sleep(1)  # Wait for the action to complete
-        print(f"Destination '{destination}' entered successfully.")
-        
-        time.sleep(1)  # Wait for input to load
+        enter_text(driver, destination_input_xpath, destination)
         
         search_button_xpath = '//*[@id="c2"]'  # XPath for the search button
-        search_button = driver.find_element(By.XPATH, search_button_xpath)
-        search_button.click()
-        time.sleep(1)  # Wait for the action to complete
-        print("Search button clicked successfully.")
+        click_element(driver, search_button_xpath)
 
         # Enter the origin
         origin_input_xpath = '//*[@id="i23"]/div[1]/div/div/div[1]/div/div/input'
-        origin_input = driver.find_element(By.XPATH, origin_input_xpath)
-        origin_input.clear()  # Clear any pre-existing text
-        origin_input.send_keys(origin)
-        time.sleep(1)  # Wait for the action to complete
-        print(f"Origin '{origin}' entered successfully.")
+        enter_text(driver, origin_input_xpath, origin)
         
-        time.sleep(2)  # Wait for input to load
-        search_button_xpath = '//*[@id="c111"]'  # XPath for the search button
-        search_button = driver.find_element(By.XPATH, search_button_xpath)
-        search_button.click()
-        time.sleep(1)  # Wait for the action to complete
-        print("Search button clicked successfully.")
+        time.sleep(2)  # Wait before clicking origin search result
+        origin_search_result_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  # XPath for the origin search result
+        click_element(driver, origin_search_result_xpath)
     
     except Exception as e:
         print(f"An error occurred: {e}")
+        
+def click_element(driver, xpath):
+    """Clicks on the element specified by the given XPath."""
+    wait_time = 1
+    try:
+        element = driver.find_element(By.XPATH, xpath)
+        element.click()
+        time.sleep(wait_time)  # Wait for the action to complete
+        print(f"Element clicked successfully: {xpath}")
+    except Exception as e:
+        print(f"An error occurred while clicking element: {xpath}, Error: {e}")
+        
+def enter_text(driver, xpath, text):
+    """Enters the given text into the element specified by the given XPath."""
+    wait_time=1
+    try:
+        element = driver.find_element(By.XPATH, xpath)
+        element.clear()  # Clear any pre-existing text
+        element.send_keys(text)
+        time.sleep(wait_time)  # Wait for the action to complete
+        print(f"Text '{text}' entered successfully in element: {xpath}")
+    except Exception as e:
+        print(f"An error occurred while entering text: {xpath}, Error: {e}")
 
 def main():
     # Setup ChromeDriver path
@@ -56,7 +67,7 @@ def main():
     # Open Google Flights
     driver.get('https://www.google.com/travel/flights?gl=GB&hl=en-GB')
 
-    routes = [('Manchester', 'Berlin')]
+    routes = [('MAN', 'Paris')]
 
     for origin, destination in routes:
         set_flight_alert(driver, origin, destination)
