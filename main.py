@@ -29,9 +29,22 @@ def set_flight_alert(driver, origin, destination):
         origin_input_xpath = '//*[@id="i23"]/div[1]/div/div/div[1]/div/div/input'
         enter_text(driver, origin_input_xpath, origin)
         
-        time.sleep(2)  # Wait before clicking origin search result
         origin_search_result_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  # XPath for the origin search result
         click_element(driver, origin_search_result_xpath)
+        
+        # Select a date - doesnt matter what it is as we will be later selecting any date for alerts
+        calendar_input_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input'
+        click_element(driver, calendar_input_xpath)
+        
+        date_input_xpath = '//*[@id="ow79"]/div[2]/div/div[2]/div[2]/div/div/div[1]/div/div[2]/div[3]/div[1]/div[4]/div/div[2]'
+        click_element(driver, date_input_xpath)
+        
+        done_button_xpath = '//*[@id="ow79"]/div[2]/div/div[3]/div[3]/div/button'
+        click_element(driver, done_button_xpath)
+        
+        # click on search 
+        search_button_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[2]/div/button'
+        click_element(driver, search_button_xpath)
     
     except Exception as e:
         print(f"An error occurred: {e}")
