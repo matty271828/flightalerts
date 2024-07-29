@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 import time
 
-def set_flight_alert(driver, origin, destination):
+def setup_search_page(driver, origin, destination):
     time.sleep(2)  # Wait for the page to load
     try:
         # Click the cookies "Accept All" button
@@ -83,7 +83,7 @@ def main():
     routes = [('MAN', 'Paris')]
 
     for origin, destination in routes:
-        set_flight_alert(driver, origin, destination)
+        setup_search_page(driver, origin, destination)
         time.sleep(500)  # Wait a bit before setting up the next alert
 
     driver.quit()
