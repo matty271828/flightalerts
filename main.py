@@ -1,7 +1,9 @@
 import time
+import os
 
 from element_interactions import click_element, enter_text
 
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
@@ -50,7 +52,33 @@ def setup_search_page(driver, origin, destination):
     except Exception as e:
         print(f"An error occurred: {e}")
         
+def sign_in(driver):
+    try:
+        sign_in_button_xpath = '//*[@id="gb"]/div[2]/div[3]/div[1]/a/span'
+        click_element(driver, sign_in_button_xpath)
+        
+        email_input_xpath = '//*[@id="identifierId"]'
+        email = os.getenv('EMAIL')
+        enter_text(driver, email_input_xpath, email)
+        
+        next_button_xpath = '//*[@id="identifierNext"]/div/button'
+        click_element(driver, next_button_xpath)
+        
+        password_input_xpath = '//*[@id="password"]/div[1]/div/div[1]/input'
+        password = os.getenv('PASSWORD')
+        enter_text(driver, password_input_xpath, password)
+        
+        next_button_xpath = '//*[@id="passwordNext"]/div/button'
+        click_element(driver, next_button_xpath)
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
+        
 def main():
+    # Load environment variables from .env file
+    load_dotenv()
+
     # Setup ChromeDriver path
     service = Service('/opt/homebrew/Caskroom/chromedriver/127.0.6533.72/chromedriver-mac-arm64/chromedriver')
     driver = webdriver.Chrome(service=service)
@@ -61,7 +89,8 @@ def main():
     routes = [('MAN', 'Paris')]
 
     for origin, destination in routes:
-        setup_search_page(driver, origin, destination)
+        setup_search_page(driver, origin, destination)     
+        sign_in(driver)
         time.sleep(500)  # Wait a bit before setting up the next alert
 
     driver.quit()
