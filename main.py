@@ -18,18 +18,18 @@ def populate_search_page(driver, origin, destination):
         one_way_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div/div/div[2]/ul/li[2]'
         click_element(driver, one_way_xpath)
         
-        # Enter the destination
-        destination_input_xpath = '//*[@id="i23"]/div[4]/div/div/div[1]/div/div/input'
-        enter_text(driver, destination_input_xpath, destination)
-        
-        list_option_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  
-        click_element(driver, list_option_xpath)
-
         # Enter the origin
-        origin_input_xpath = '//*[@id="i23"]/div[1]/div/div/div[1]/div/div/input'
+        origin_input_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div/div[1]/div/div/input'
         enter_text(driver, origin_input_xpath, origin)
         
         list_option_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'
+        click_element(driver, list_option_xpath)
+        
+        # Enter the destination
+        destination_input_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[4]/div/div/div[1]/div/div/input'
+        enter_text(driver, destination_input_xpath, destination)
+        
+        list_option_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  
         click_element(driver, list_option_xpath)
         
         # Select a date - doesnt matter what it is as we will be later selecting any date for alerts
@@ -104,8 +104,6 @@ def reset_search_page(driver):
         flights_tab_xpath = '/html/body/c-wiz[1]/div[1]/header/div[2]/div[2]/div[1]/div/nav/div[3]/div/button'
         click_element(driver, flights_tab_xpath)
         
-        time.sleep(3)
-
     except Exception as e:
         print(f"An error occurred: {e}")
         
@@ -138,7 +136,7 @@ def main():
         
         populate_search_page(driver, origin, destination)       
          
-        set_flight_alert(driver)
+        #set_flight_alert(driver)
         
     time.sleep(10)
     
