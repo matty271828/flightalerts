@@ -36,10 +36,10 @@ def populate_search_page(driver, origin, destination):
         calendar_input_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input'
         click_element(driver, calendar_input_xpath)
         
-        date_input_xpath = '//*[@id="ow79"]/div[2]/div/div[2]/div[2]/div/div/div[1]/div/div[2]/div[3]/div[1]/div[4]/div/div[2]'
+        date_input_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div/div[2]/div[3]/div[1]/div[4]'
         click_element(driver, date_input_xpath)
         
-        done_button_xpath = '//*[@id="ow79"]/div[2]/div/div[3]/div[3]/div/button'
+        done_button_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[2]/div/div[3]/div[3]/div/button/span'
         click_element(driver, done_button_xpath)
         
         # click on search 
@@ -136,10 +136,10 @@ def main():
         
         populate_search_page(driver, origin, destination)       
          
-        #set_flight_alert(driver)
+        set_flight_alert(driver)
         
-    time.sleep(10)
-    
+    time.sleep(2)
+        
     driver.quit()
 
 if __name__ == "__main__":
