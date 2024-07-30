@@ -2,6 +2,7 @@ import time
 import os
 
 from element_interactions import click_element, enter_text
+from routes import routes
 
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -115,11 +116,6 @@ def main():
     service = Service('/opt/homebrew/Caskroom/chromedriver/127.0.6533.72/chromedriver-mac-arm64/chromedriver')
     driver = webdriver.Chrome(service=service)
     driver.get('https://www.google.com/travel/flights?gl=GB&hl=en-GB')
-
-    routes = [
-        ('MAN', 'Paris'),
-        ('Paris', 'MAN'),
-    ]
     
     accept_cookies(driver)
     sign_in(driver)
