@@ -21,7 +21,7 @@ def populate_initial_search_page(driver, origin, destination):
         destination_input_xpath = '//*[@id="i23"]/div[4]/div/div/div[1]/div/div/input'
         enter_text(driver, destination_input_xpath, destination)
         
-        search_button_xpath = '//*[@id="c2"]'  # XPath for the search button
+        search_button_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  # XPath for the search button
         click_element(driver, search_button_xpath)
 
         # Enter the origin
@@ -72,7 +72,7 @@ def sign_in(driver):
         
 def set_flight_alert(driver):
     try:
-        set_alert_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[1]/span[2]/span[2]/button/span'
+        set_alert_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[2]/span[2]/span[2]/button'
         click_element(driver, set_alert_xpath)
         
     except Exception as e:
@@ -108,6 +108,7 @@ def main():
         populate_initial_search_page(driver, origin, destination)     
         
         set_flight_alert(driver)
+        
         time.sleep(500)  # Wait a bit before setting up the next alert
 
     driver.quit()
