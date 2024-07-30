@@ -7,13 +7,9 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
-def setup_search_page(driver, origin, destination):
+def populate_initial_search_page(driver, origin, destination):
     time.sleep(2)  # Wait for the page to load
     try:
-        # Click the cookies "Accept All" button
-        accept_cookies_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button/span'
-        click_element(driver, accept_cookies_xpath)
-        
         # Select one way flight
         trip_type_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[1]/div[1]/div/div/div/div[1]/div'
         click_element(driver, trip_type_xpath)
@@ -54,7 +50,7 @@ def setup_search_page(driver, origin, destination):
         
 def sign_in(driver):
     try:
-        sign_in_button_xpath = '//*[@id="gb"]/div[2]/div[3]/div[1]/a/span'
+        sign_in_button_xpath = '//*[@id="gb"]/div[2]/div[3]/div[1]/a'
         click_element(driver, sign_in_button_xpath)
         
         email_input_xpath = '//*[@id="identifierId"]'
@@ -76,11 +72,20 @@ def sign_in(driver):
         
 def set_flight_alert(driver):
     try:
-        set_alert_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[2]/span[2]/span[2]/button/span'
+        set_alert_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[1]/span[2]/span[2]/button/span'
         click_element(driver, set_alert_xpath)
         
     except Exception as e:
         print(f"An error occurred: {e}")
+        
+def accept_cookies(driver):
+    try:
+        # Click the cookies "Accept All" button
+        accept_cookies_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button/span'
+        click_element(driver, accept_cookies_xpath)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
         
 def main():
     # Load environment variables from .env file
@@ -96,8 +101,12 @@ def main():
     routes = [('MAN', 'Paris')]
 
     for origin, destination in routes:
-        setup_search_page(driver, origin, destination)     
+        accept_cookies(driver)
+        
         sign_in(driver)
+        
+        populate_initial_search_page(driver, origin, destination)     
+        
         set_flight_alert(driver)
         time.sleep(500)  # Wait a bit before setting up the next alert
 
