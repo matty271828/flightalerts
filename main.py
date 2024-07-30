@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 
-def populate_initial_search_page(driver, origin, destination):
+def populate_search_page(driver, origin, destination):
     time.sleep(2)  # Wait for the page to load
     try:
         # Select one way flight
@@ -22,15 +22,15 @@ def populate_initial_search_page(driver, origin, destination):
         destination_input_xpath = '//*[@id="i23"]/div[4]/div/div/div[1]/div/div/input'
         enter_text(driver, destination_input_xpath, destination)
         
-        search_button_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  # XPath for the search button
-        click_element(driver, search_button_xpath)
+        list_option_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  
+        click_element(driver, list_option_xpath)
 
         # Enter the origin
         origin_input_xpath = '//*[@id="i23"]/div[1]/div/div/div[1]/div/div/input'
         enter_text(driver, origin_input_xpath, origin)
         
-        origin_search_result_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'  # XPath for the origin search result
-        click_element(driver, origin_search_result_xpath)
+        list_option_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[1]/div[6]/div[3]/ul/li[1]'
+        click_element(driver, list_option_xpath)
         
         # Select a date - doesnt matter what it is as we will be later selecting any date for alerts
         calendar_input_xpath = '//*[@id="yDmH0d"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[1]/div[1]/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div/div[1]/div/div[1]/div/input'
@@ -48,7 +48,7 @@ def populate_initial_search_page(driver, origin, destination):
     
     except Exception as e:
         print(f"An error occurred: {e}")
-        
+                
 def sign_in(driver):
     try:
         sign_in_button_xpath = '//*[@id="gb"]/div[2]/div[3]/div[1]/a'
@@ -95,34 +95,53 @@ def accept_cookies(driver):
         # Click the cookies "Accept All" button
         accept_cookies_xpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/div[1]/form[2]/div/div/button/span'
         click_element(driver, accept_cookies_xpath)
+        
     except Exception as e:
         print(f"An error occurred: {e}")
         
+def reset_search_page(driver):
+    try:
+        flights_tab_xpath = '/html/body/c-wiz[1]/div[1]/header/div[2]/div[2]/div[1]/div/nav/div[3]/div/button'
+        click_element(driver, flights_tab_xpath)
+        
+        time.sleep(3)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
         
 def main():
     # Load environment variables from .env file
     load_dotenv()
 
-    # Setup ChromeDriver path
+    # Open Google Flights
     service = Service('/opt/homebrew/Caskroom/chromedriver/127.0.6533.72/chromedriver-mac-arm64/chromedriver')
     driver = webdriver.Chrome(service=service)
-
-    # Open Google Flights
     driver.get('https://www.google.com/travel/flights?gl=GB&hl=en-GB')
 
-    routes = [('MAN', 'Paris')]
+    routes = [
+        ('MAN', 'Paris'),
+        ('Paris', 'MAN'),
+    ]
+    
+    accept_cookies(driver)
+    sign_in(driver)
+    
+    # Custom handling for the first route
+    origin, destination = routes[0]
+    populate_search_page(driver, origin, destination)     
+    set_flight_alert(driver)
 
-    for origin, destination in routes:
-        accept_cookies(driver)
+    for origin, destination in routes[1:len(routes)]:
+        print("attempting to populate: " + origin + ", " + destination)
         
-        sign_in(driver)
+        reset_search_page(driver)
         
-        populate_initial_search_page(driver, origin, destination)     
-        
+        populate_search_page(driver, origin, destination)       
+         
         set_flight_alert(driver)
         
-        time.sleep(500)  # Wait a bit before setting up the next alert
-
+    time.sleep(10)
+    
     driver.quit()
 
 if __name__ == "__main__":
