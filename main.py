@@ -5,6 +5,7 @@ from element_interactions import click_element, enter_text
 
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 
 def populate_initial_search_page(driver, origin, destination):
@@ -73,7 +74,18 @@ def sign_in(driver):
 def set_flight_alert(driver):
     try:
         set_alert_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[2]/span[2]/span[2]/button'
-        click_element(driver, set_alert_xpath)
+        
+        # Find the button element using XPath
+        button_element = driver.find_element(By.XPATH, set_alert_xpath)
+        
+        # Check if the aria-checked attribute is set to 'false'
+        aria_checked = button_element.get_attribute("aria-checked")
+        
+        if aria_checked == 'false':
+            # Click the button if aria-checked is 'false'
+            click_element(driver, set_alert_xpath)
+        else:
+            print("Alert is already set.")       
         
     except Exception as e:
         print(f"An error occurred: {e}")
