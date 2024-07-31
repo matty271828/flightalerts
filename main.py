@@ -37,9 +37,9 @@ def main():
                 print("All emails have reached the alert limit.")
                 break
             sign_in(driver, gmail_accounts[current_account_index][current_account_index])
-            reset_search_page(driver)
 
         print(f"Attempting to set alert for: {origin} -> {destination} using email: {gmail_accounts[current_account_index][0]}")
+        reset_search_page(driver)
         populate_search_page(driver, origin, destination)       
         set_flight_alert(driver)
         update_gmail_alert_count(gmail_accounts, current_account_index)
