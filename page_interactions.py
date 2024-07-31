@@ -3,6 +3,8 @@ import os
 
 from element_interactions import click_element, enter_text, refresh_page
 
+from selenium.webdriver.common.by import By
+
 def populate_search_page(driver, origin, destination):
     time.sleep(2)  # Wait for the page to load
     try:
@@ -42,7 +44,7 @@ def populate_search_page(driver, origin, destination):
         click_element(driver, search_button_xpath)
     
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Failed to populate search page - triggering refresh: {e}")
         refresh_page(driver)
                 
 def sign_in(driver, email_address):
@@ -64,7 +66,7 @@ def sign_in(driver, email_address):
         click_element(driver, next_button_xpath)
     
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Failed to sign in: {e}")
         
 def set_flight_alert(driver):
     try:
@@ -83,7 +85,7 @@ def set_flight_alert(driver):
             print("Alert is already set.")       
         
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Failed to set flight alert: {e}")
         
 def accept_cookies(driver):
     try:
@@ -92,7 +94,7 @@ def accept_cookies(driver):
         click_element(driver, accept_cookies_xpath)
         
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Failed to accept cookies: {e}")
         
 def reset_search_page(driver):
     try:
@@ -100,4 +102,4 @@ def reset_search_page(driver):
         click_element(driver, flights_tab_xpath)
         
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Failed to reset search page: {e}")

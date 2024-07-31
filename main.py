@@ -6,7 +6,6 @@ from page_interactions import accept_cookies, sign_in, populate_search_page, set
 
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
         
 def main():
