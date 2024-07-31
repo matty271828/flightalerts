@@ -25,3 +25,12 @@ def enter_text(driver, xpath, text):
         print(f"Text '{text}' entered successfully in element: {xpath}")
     except Exception as e:
         print(f"An error occurred while entering text: {xpath}, Error: {e}")
+
+def refresh_page(driver):
+    wait_time = 5
+    try: 
+        print("Attempting to refresh the page")
+        driver.refresh()
+        time.sleep(wait_time)
+    except Exception as e:
+        print("An error occurred attempting to refresh the page")

@@ -1,7 +1,7 @@
 import time
 import os
 
-from element_interactions import click_element, enter_text
+from element_interactions import click_element, enter_text, refresh_page
 from routes import routes
 
 from dotenv import load_dotenv
@@ -49,6 +49,7 @@ def populate_search_page(driver, origin, destination):
     
     except Exception as e:
         print(f"An error occurred: {e}")
+        refresh_page(driver)
                 
 def sign_in(driver):
     try:
@@ -62,7 +63,7 @@ def sign_in(driver):
         next_button_xpath = '//*[@id="identifierNext"]/div/button'
         click_element(driver, next_button_xpath)
         
-        password_input_xpath = '//*[@id="password"]/div[1]/div/div[1]/input'
+        password_input_xpath = '/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[2]/div/div/div/form/span/section[2]/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input'
         password = os.getenv('PASSWORD')
         enter_text(driver, password_input_xpath, password)
         
