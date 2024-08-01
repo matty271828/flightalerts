@@ -68,6 +68,15 @@ def sign_in(driver, email_address):
     except Exception as e:
         print(f"Failed to sign in: {e}")
         
+def sign_out(driver):
+    try:
+        account_button_xpath = '/html/body/c-wiz[1]/div[1]/header/div[2]/div[3]/div[1]/div[2]/div/a'
+        click_element(driver, account_button_xpath)
+        
+    except Exception as e:
+        print(f"Failed to sign out: {e}")
+        
+        
 def set_flight_alert(driver):
     try:
         set_alert_xpath = '/html/body/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[2]/div[1]/div/div[1]/label[2]/span[2]/span[2]/button'

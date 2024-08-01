@@ -55,7 +55,6 @@ routes = [
     ('MAN', 'Eindhoven'), ('Eindhoven', 'MAN'),
     ('MAN', 'Enfidha'), ('Enfidha', 'MAN'),
     ('MAN', 'Faro'), ('Faro', 'MAN'),
-    ('MAN', 'Florida'), ('Florida', 'MAN'),
     ('MAN', 'Frankfurt'), ('Frankfurt', 'MAN'),
     ('MAN', 'Fuerteventura'), ('Fuerteventura', 'MAN'),
     ('MAN', 'Gdansk'), ('Gdansk', 'MAN'),

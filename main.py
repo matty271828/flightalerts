@@ -36,7 +36,14 @@ def main():
             if current_account_index >= len(gmail_accounts):
                 print("All emails have reached the alert limit.")
                 break
-            sign_in(driver, gmail_accounts[current_account_index][current_account_index])
+            # Force a sign out
+            driver.quit()
+            time.sleep(3)
+            driver = webdriver.Chrome(service=service)
+            driver.get('https://www.google.com/travel/flights?gl=GB&hl=en-GB')
+            # sign in using the next email address
+            accept_cookies(driver)
+            sign_in(driver, gmail_accounts[current_account_index][0])
 
         print(f"Attempting to set alert for: {origin} -> {destination} using email: {gmail_accounts[current_account_index][0]}")
         reset_search_page(driver)
