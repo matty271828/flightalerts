@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 gmail_accounts.txt
+
+google.env
