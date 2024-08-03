@@ -37,12 +37,12 @@ func main() {
 	}
 
 	// Example usage of SheetsService
-	spreadsheetId := "your-spreadsheet-id"
-	writeRange := "Sheet1!A1"
+	sheetName := "all_flights"
 	values := [][]interface{}{
-		{"Hello", "World"},
+		{"Date", "Type", "Airline", "Origin", "Destination", "Duration", "URL", "Price"},
+		{"2024-08-03", "OneWay", "ExampleAir", "JFK", "LAX", "1hr", "https://exampleurl.com", "300"},
 	}
-	if err := sheetsService.WriteData(spreadsheetId, writeRange, values); err != nil {
+	if err := sheetsService.AppendData(sheetName, values); err != nil {
 		log.Fatalf("Unable to write data to sheet: %v", err)
 	}
 }
