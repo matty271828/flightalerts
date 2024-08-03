@@ -18,6 +18,7 @@ func NewSheetsService(client *http.Client) (*SheetsService, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println("Successfully initialised sheets service")
 	return &SheetsService{Service: service}, nil
 }
 

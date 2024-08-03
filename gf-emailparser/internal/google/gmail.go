@@ -2,6 +2,7 @@
 package google
 
 import (
+	"log"
 	"net/http"
 
 	"google.golang.org/api/gmail/v1"
@@ -16,6 +17,7 @@ func NewGmailService(client *http.Client) (*GmailService, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println("Successfully initialised gmail service")
 	return &GmailService{Service: service}, nil
 }
 

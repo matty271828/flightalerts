@@ -166,3 +166,5 @@ gmail_accounts.txt
 google.env
 
 bin/
+
+token.json
