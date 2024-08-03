@@ -51,11 +51,10 @@ func main() {
 		}
 	*/
 	// Example usage of SheetsService
-	sheetName := "all_flights"
 	data := []internalGoogle.FlightData{
 		{Date: "2024-08-03", Type: "OneWay", Airline: "ExampleAir", Origin: "JFK", Destination: "LAX", Duration: "1hr", URL: "https://exampleurl.com", Price: "300"},
 	}
-	if err := sheets.AppendData(sheetName, data); err != nil {
+	if err := sheets.AppendFlightData(data); err != nil {
 		log.Fatalf("Unable to write data to sheet: %v", err)
 	}
 }
