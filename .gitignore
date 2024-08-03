@@ -164,3 +164,5 @@ cython_debug/
 gmail_accounts.txt
 
 google.env
+
+bin/

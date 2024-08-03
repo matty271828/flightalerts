@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("Unable to get client: %v", err)
 	}
 
-	gmailService, err := google.NewGmailService(client)
+	_, err = google.NewGmailService(client)
 	if err != nil {
 		log.Fatalf("Unable to create Gmail service: %v", err)
 	}
@@ -28,18 +28,20 @@ func main() {
 	}
 
 	// Example usage of GmailService
-	messages, err := gmailService.ListMessages("me")
-	if err != nil {
-		log.Fatalf("Unable to list messages: %v", err)
-	}
-
-	for _, m := range messages {
-		msg, err := gmailService.GetMessage("me", m.Id)
+	/*
+		messages, err := gmailService.ListMessages("me")
 		if err != nil {
-			log.Fatalf("Unable to retrieve message: %v", err)
+			log.Fatalf("Unable to list messages: %v", err)
 		}
-		log.Printf("Message snippet: %s\n", msg.Snippet)
-	}
+
+		for _, m := range messages {
+			msg, err := gmailService.GetMessage("me", m.Id)
+			if err != nil {
+				log.Fatalf("Unable to retrieve message: %v", err)
+			}
+			log.Printf("Message snippet: %s\n", msg.Snippet)
+		}
+	*/
 
 	// Example usage of SheetsService
 	sheetName := "all_flights"
