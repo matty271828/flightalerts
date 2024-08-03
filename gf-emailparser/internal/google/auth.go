@@ -8,16 +8,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
-
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-}
 
 func getClient(config *oauth2.Config) *http.Client {
 	tokFile := "token.json"

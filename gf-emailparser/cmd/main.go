@@ -3,10 +3,15 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
 	google "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	client, err := google.GetClient()
 	if err != nil {
 		log.Fatalf("Unable to get client: %v", err)
