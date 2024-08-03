@@ -1,10 +1,13 @@
+// cmd/main.go
 package main
 
 import (
 	"log"
 
+	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
+	"github.com/matty271828/flightalerts/gf-emailparser/internal/server"
+
 	"github.com/joho/godotenv"
-	google "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
 )
 
 func main() {
@@ -12,23 +15,28 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	client, err := google.GetClient()
+	// Start OAuth server
+	oauthConfig := server.InitOAuth()
+	go server.Start()
+
+	// Use the client after manual OAuth authentication
+	client, err := internalGoogle.GetClient(oauthConfig)
 	if err != nil {
 		log.Fatalf("Unable to get client: %v", err)
 	}
 
-	_, err = google.NewGmailService(client)
+	_, err = internalGoogle.NewGmailService(client)
 	if err != nil {
 		log.Fatalf("Unable to create Gmail service: %v", err)
 	}
 
-	sheetsService, err := google.NewSheetsService(client)
+	_, err = internalGoogle.NewSheetsService(client)
 	if err != nil {
 		log.Fatalf("Unable to create Sheets service: %v", err)
 	}
 
-	// Example usage of GmailService
 	/*
+		// Example usage of GmailService
 		messages, err := gmailService.ListMessages("me")
 		if err != nil {
 			log.Fatalf("Unable to list messages: %v", err)
@@ -41,15 +49,15 @@ func main() {
 			}
 			log.Printf("Message snippet: %s\n", msg.Snippet)
 		}
-	*/
 
-	// Example usage of SheetsService
-	sheetName := "all_flights"
-	values := [][]interface{}{
-		{"Date", "Type", "Airline", "Origin", "Destination", "Duration", "URL", "Price"},
-		{"2024-08-03", "OneWay", "ExampleAir", "JFK", "LAX", "1hr", "https://exampleurl.com", "300"},
-	}
-	if err := sheetsService.AppendData(sheetName, values); err != nil {
-		log.Fatalf("Unable to write data to sheet: %v", err)
-	}
+		// Example usage of SheetsService
+		sheetName := "all_flights"
+		values := [][]interface{}{
+			{"Date", "Type", "Airline", "Origin", "Destination", "Duration", "URL", "Price"},
+			{"2024-08-03", "OneWay", "ExampleAir", "JFK", "LAX", "1hr", "https://exampleurl.com", "300"},
+		}
+		if err := sheetsService.AppendData(sheetName, values); err != nil {
+			log.Fatalf("Unable to write data to sheet: %v", err)
+		}
+	*/
 }
