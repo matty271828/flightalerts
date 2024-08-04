@@ -25,14 +25,14 @@ func main() {
 		log.Fatalf("Unable to get client: %v", err)
 	}
 
-	_, err = internalGoogle.NewGmailService(client)
-	if err != nil {
-		log.Fatalf("Unable to create Gmail service: %v", err)
-	}
-
 	sheets, err := internalGoogle.NewSheetsService(client)
 	if err != nil {
 		log.Fatalf("Unable to create Sheets service: %v", err)
+	}
+
+	_, err = internalGoogle.NewGmailService(client, sheets)
+	if err != nil {
+		log.Fatalf("Unable to create Gmail service: %v", err)
 	}
 
 	/*
