@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
@@ -30,26 +31,40 @@ func main() {
 		log.Fatalf("Unable to create Sheets service: %v", err)
 	}
 
-	_, err = internalGoogle.NewGmailService(client, sheets)
+	gmail, err := internalGoogle.NewGmailService(client, sheets)
 	if err != nil {
 		log.Fatalf("Unable to create Gmail service: %v", err)
 	}
 
-	/*
-		// Example usage of GmailService
-		messages, err := gmailService.ListMessages("me")
-		if err != nil {
-			log.Fatalf("Unable to list messages: %v", err)
-		}
+	// Example usage of GmailService
+	messages, err := gmail.ListNewMessages("me")
+	if err != nil {
+		log.Fatalf("Unable to list new messages: %v", err)
+	}
 
-		for _, m := range messages {
-			msg, err := gmailService.GetMessage("me", m.Id)
-			if err != nil {
-				log.Fatalf("Unable to retrieve message: %v", err)
-			}
-			log.Printf("Message snippet: %s\n", msg.Snippet)
-		}
-	*/
+	if len(messages) == 0 {
+		log.Println("No new messages found.")
+		return
+	}
+
+	// Retrieve the full message
+	firstMessage, err := gmail.GetMessage("me", messages[0].Id)
+	if err != nil {
+		log.Fatalf("Unable to retrieve message: %v", err)
+	}
+
+	log.Printf("Message ID: %s", firstMessage.Id)
+	log.Printf("Message snippet: %s", firstMessage.Snippet)
+
+	// Print the entire message payload
+	content := internalGoogle.GetMessageContent(firstMessage.Payload)
+	if content != "" {
+		fmt.Println("Message Content:")
+		fmt.Println(content)
+	} else {
+		log.Println("No plain text content found in the message.")
+	}
+
 	// Example usage of SheetsService
 	data := []internalGoogle.FlightData{
 		{Date: "2024-08-03", Type: "OneWay", Airline: "ExampleAir", Origin: "JFK", Destination: "LAX", Duration: "1hr", URL: "https://exampleurl.com", Price: "300"},
