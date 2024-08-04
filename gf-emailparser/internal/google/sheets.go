@@ -39,6 +39,7 @@ type FlightData struct {
 	Duration    string
 	URL         string
 	Price       string
+	Discount    string
 }
 
 // prepareDataForSheets is used to transform the custom type FlightData
@@ -144,8 +145,9 @@ func (s *SheetsService) GetLatestProcessedMessageMetadata() (*MessageMetaData, e
 		return nil, fmt.Errorf("unable to retrieve data from sheet: %v", err)
 	}
 
+	// No error since this indicates that no messages have been read yet.
 	if len(resp.Values) == 0 {
-		return nil, fmt.Errorf("no data found in the last row")
+		return nil, nil
 	}
 
 	latestRow := resp.Values[0]

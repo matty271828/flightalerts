@@ -2,6 +2,7 @@
 package google
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -68,4 +69,32 @@ func (g *GmailService) GetMessage(user, messageId string) (*gmail.Message, error
 		return nil, err
 	}
 	return msg, nil
+}
+
+// decodeMessagePart decodes the message part and returns its plain text content
+func DecodeMessagePart(part *gmail.MessagePart) (string, error) {
+	data, err := base64.URLEncoding.DecodeString(part.Body.Data)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// getMessageContent traverses the message payload and returns the plain text content
+func GetMessageContent(payload *gmail.MessagePart) string {
+	if payload.MimeType == "text/plain" {
+		content, err := DecodeMessagePart(payload)
+		if err == nil {
+			return content
+		}
+	}
+
+	for _, part := range payload.Parts {
+		content := GetMessageContent(part)
+		if content != "" {
+			return content
+		}
+	}
+
+	return ""
 }
