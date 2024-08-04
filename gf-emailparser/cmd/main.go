@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
@@ -47,29 +46,12 @@ func main() {
 		return
 	}
 
-	// Retrieve the full message
-	firstMessage, err := gmail.GetMessage("me", messages[0].Id)
+	data, err := gmail.ExtractFlightData(messages[0])
 	if err != nil {
-		log.Fatalf("Unable to retrieve message: %v", err)
+		log.Fatalf("Failed to extract flight data from email: %v", err)
 	}
 
-	log.Printf("Message ID: %s", firstMessage.Id)
-	log.Printf("Message snippet: %s", firstMessage.Snippet)
-
-	// Print the entire message payload
-	content := internalGoogle.GetMessageContent(firstMessage.Payload)
-	if content != "" {
-		fmt.Println("Message Content:")
-		fmt.Println(content)
-	} else {
-		log.Println("No plain text content found in the message.")
-	}
-
-	// Example usage of SheetsService
-	data := []internalGoogle.FlightData{
-		{Date: "2024-08-03", Type: "OneWay", Airline: "ExampleAir", Origin: "JFK", Destination: "LAX", Duration: "1hr", URL: "https://exampleurl.com", Price: "300"},
-	}
-	if err := sheets.AppendFlightData(data); err != nil {
+	if err := sheets.AppendFlightData(*data); err != nil {
 		log.Fatalf("Unable to write data to sheet: %v", err)
 	}
 }
