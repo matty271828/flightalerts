@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("unable to get client: %v", err)
 	}
 
-	sheets, err := internalGoogle.NewSheetsService(client, internalGoogle.NewQueuer(100))
+	sheets, err := internalGoogle.NewSheetsService(client)
 	if err != nil {
 		log.Fatalf("unable to create Sheets service: %v", err)
 	}
@@ -43,4 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to run read emails job: %v", err)
 	}
+
+	// Wait for all goroutines to finish
+	jobs.Wg.Wait()
 }

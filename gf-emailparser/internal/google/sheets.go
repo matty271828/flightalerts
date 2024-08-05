@@ -12,17 +12,16 @@ import (
 
 type SheetsService struct {
 	Service *sheets.Service
-	Queuer  *Queuer
 }
 
-func NewSheetsService(client *http.Client, Queuer *Queuer) (*SheetsService, error) {
+func NewSheetsService(client *http.Client) (*SheetsService, error) {
 	service, err := sheets.New(client)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Println("Successfully initialised sheets service")
-	return &SheetsService{Service: service, Queuer: Queuer}, nil
+	return &SheetsService{Service: service}, nil
 }
 
 const (
@@ -86,23 +85,18 @@ func prepareFlightDataForSheet(data []FlightData) [][]interface{} {
 // AppendFlightData is used to add row(s) of FlightData to the
 // flight_data sheet in Google Sheets.
 func (s *SheetsService) AppendFlightData(data []FlightData) error {
-	work := func() error {
-		spreadsheetId := os.Getenv("SPREADSHEET_ID")
-		rangeToWrite := allFlights + "!A1" // Starting range, append will handle the rest
+	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	rangeToWrite := allFlights + "!A1" // Starting range, append will handle the rest
 
-		// Prepare the data for appending
-		values := prepareFlightDataForSheet(data)
-		vr := &sheets.ValueRange{Values: values}
+	// Prepare the data for appending
+	values := prepareFlightDataForSheet(data)
+	vr := &sheets.ValueRange{Values: values}
 
-		_, err := s.Service.Spreadsheets.Values.Append(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").InsertDataOption("INSERT_ROWS").Context(context.Background()).Do()
-		if err != nil {
-			return err
-		}
-		log.Println("Flight Data appended to sheet")
-		return nil
+	_, err := s.Service.Spreadsheets.Values.Append(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").InsertDataOption("INSERT_ROWS").Context(context.Background()).Do()
+	if err != nil {
+		return err
 	}
-
-	s.Queuer.QueueWork(work)
+	log.Println("Flight Data appended to sheet")
 	return nil
 }
 
@@ -125,23 +119,18 @@ func prepareMessageMetaDataForSheet(metaData *MessageMetaData) [][]interface{} {
 // MarkMessageAsRead is used to add a message id and date of the message
 // to a sheet tracking previously read messages.
 func (s *SheetsService) MarkMessageAsRead(id string, internalDate int64) error {
-	work := func() error {
-		spreadsheetId := os.Getenv("SPREADSHEET_ID")
-		rangeToWrite := readMessages + "!A1" // Starting range, append will handle the rest
+	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	rangeToWrite := readMessages + "!A1" // Starting range, append will handle the rest
 
-		metaData := MessageMetaData{ID: id, InternalDate: internalDate}
-		values := prepareMessageMetaDataForSheet(&metaData)
-		vr := &sheets.ValueRange{Values: values}
+	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
+	values := prepareMessageMetaDataForSheet(&metaData)
+	vr := &sheets.ValueRange{Values: values}
 
-		_, err := s.Service.Spreadsheets.Values.Append(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").InsertDataOption("INSERT_ROWS").Context(context.Background()).Do()
-		if err != nil {
-			return err
-		}
-		log.Println("Message successfully marked as read")
-		return nil
+	_, err := s.Service.Spreadsheets.Values.Append(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").InsertDataOption("INSERT_ROWS").Context(context.Background()).Do()
+	if err != nil {
+		return err
 	}
-
-	s.Queuer.QueueWork(work)
+	log.Println("Message successfully marked as read")
 	return nil
 }
 
