@@ -12,6 +12,7 @@ import (
 
 type SheetsService struct {
 	Service *sheets.Service
+	Queuer  *Queuer
 }
 
 func NewSheetsService(client *http.Client) (*SheetsService, error) {
@@ -19,8 +20,9 @@ func NewSheetsService(client *http.Client) (*SheetsService, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	log.Println("Successfully initialised sheets service")
-	return &SheetsService{Service: service}, nil
+	return &SheetsService{Service: service, Queuer: NewQueuer(1)}, nil
 }
 
 const (
