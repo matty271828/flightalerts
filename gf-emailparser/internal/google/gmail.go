@@ -29,15 +29,15 @@ func NewGmailService(client *http.Client, sheets *SheetsService) (*GmailService,
 // ListNewMessages is used to return all currently unread flight alert emails in the inbox.
 func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 	// Retrieve the latest processed message metadata
-	lastRead, err := g.Sheets.GetLatestReadMessageMetadata()
+	cutoff, err := g.Sheets.GetCutoffMessageMetadata()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve latest processed message metadata: %v", err)
 	}
 
-	// If there is a lastRead message, use its internalDate to filter newer messages
+	// If there is a cutoff message, use its internalDate to filter newer messages
 	var query string
-	if lastRead != nil {
-		query = fmt.Sprintf(" after:%d", lastRead.InternalDate/1000)
+	if cutoff != nil {
+		query = fmt.Sprintf(" after:%d", cutoff.InternalDate/1000)
 	}
 
 	// Retrieve messages from Gmail
@@ -48,8 +48,8 @@ func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 
 	// Create a map of processed message IDs for quick lookup
 	processedMessageMap := make(map[string]struct{})
-	if lastRead != nil {
-		processedMessageMap[lastRead.ID] = struct{}{}
+	if cutoff != nil {
+		processedMessageMap[cutoff.ID] = struct{}{}
 	}
 
 	// Filter out messages that have already been processed

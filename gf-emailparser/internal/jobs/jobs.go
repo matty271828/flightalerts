@@ -56,7 +56,7 @@ func (j *Jobs) ReadEmailsSubJob() error {
 		return nil
 	}
 
-	for _, message := range messages {
+	for i, message := range messages {
 		// Add a 2 second delay between processing each message
 		time.Sleep(2 * time.Second)
 
@@ -72,6 +72,14 @@ func (j *Jobs) ReadEmailsSubJob() error {
 		err = j.Gmail.Sheets.MarkMessageAsRead(metaData.ID, metaData.InternalDate)
 		if err != nil {
 			return fmt.Errorf("failed to mark message as read: %v", err)
+		}
+
+		if i == 0 {
+			err = j.Gmail.Sheets.MarkMessageAsCutoff(metaData.ID, message.InternalDate)
+			if err != nil {
+				time.Sleep(1 * time.Second)
+				return fmt.Errorf("failed to mark message as cutoff: %v", err)
+			}
 		}
 	}
 

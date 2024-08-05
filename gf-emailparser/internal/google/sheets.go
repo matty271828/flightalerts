@@ -28,6 +28,7 @@ func NewSheetsService(client *http.Client) (*SheetsService, error) {
 const (
 	allFlights   = "all_flights"
 	readMessages = "read_messages"
+	lastRead     = "last_read"
 )
 
 // FlightData is a custom type used to serve flight information
@@ -137,9 +138,28 @@ func (s *SheetsService) MarkMessageAsRead(id string, internalDate int64) error {
 	return nil
 }
 
+// MarkMessageAsCutoff is used to save the metadata of the cutoff message.
+// The cutoff message is the first read message of the previous run, so for subsequent
+// runs we do not need to keep reading once we reach it.
+func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate int64) error {
+	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	rangeToWrite := readMessages + "!A2:B2"
+
+	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
+	values := prepareMessageMetaDataForSheet(&metaData)
+	vr := &sheets.ValueRange{Values: values}
+
+	_, err := s.Service.Spreadsheets.Values.Update(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").Context(context.Background()).Do()
+	if err != nil {
+		return err
+	}
+	log.Println("Message successfully marked as cutoff")
+	return nil
+}
+
 // GetLatestProcessedMessage is used to find the last previously read message in order
 // to act as a cutoff for reading emails.
-func (s *SheetsService) GetLatestReadMessageMetadata() (*MessageMetaData, error) {
+func (s *SheetsService) GetCutoffMessageMetadata() (*MessageMetaData, error) {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
 
 	// Get the sheet metadata to find the total number of rows
@@ -150,7 +170,7 @@ func (s *SheetsService) GetLatestReadMessageMetadata() (*MessageMetaData, error)
 
 	var totalRows int64
 	for _, sheet := range sheetMetadata.Sheets {
-		if sheet.Properties.Title == readMessages {
+		if sheet.Properties.Title == lastRead {
 			totalRows = sheet.Properties.GridProperties.RowCount
 			break
 		}
@@ -161,7 +181,7 @@ func (s *SheetsService) GetLatestReadMessageMetadata() (*MessageMetaData, error)
 	}
 
 	// Construct the range to read the last row
-	rangeToRead := fmt.Sprintf("%s!A%d:B%d", readMessages, totalRows, totalRows)
+	rangeToRead := fmt.Sprintf("%s!A%d:B%d", lastRead, totalRows, totalRows)
 
 	resp, err := s.Service.Spreadsheets.Values.Get(spreadsheetId, rangeToRead).MajorDimension("ROWS").Do()
 	if err != nil {
