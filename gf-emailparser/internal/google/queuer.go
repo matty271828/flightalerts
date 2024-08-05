@@ -11,32 +11,25 @@ type WriteRequest struct {
 }
 
 type Queuer struct {
-	queue       chan WriteRequest
-	workerCount int
-	errorChan   chan error
+	queue     chan WriteRequest
+	errorChan chan error
 }
 
 // NewQueuer is used to create a buffered channel in order
 // to provide a queue for write requests to google sheets.
-func NewQueuer(workerCount int) *Queuer {
+func NewQueuer(bufferSize int) *Queuer {
 	q := &Queuer{
-		queue:       make(chan WriteRequest, 100), // Adjust buffer size as needed
-		workerCount: workerCount,
-		errorChan:   make(chan error),
+		queue:     make(chan WriteRequest, bufferSize), // Adjust buffer size as needed
+		errorChan: make(chan error),
 	}
 
-	for i := 0; i < workerCount; i++ {
-		go q.worker()
-	}
+	go q.worker()
 
 	return q
 }
 
 func (q *Queuer) worker() {
 	for req := range q.queue {
-		// Introduce a delay to throttle requests
-		time.Sleep(time.Second)
-
 		err := req.Function()
 		if err != nil {
 			if req.RetryCount < 3 {
@@ -47,21 +40,26 @@ func (q *Queuer) worker() {
 				q.errorChan <- err
 			}
 		}
+
+		// Introduce a delay to throttle requests
+		time.Sleep(time.Second)
 	}
 }
 
 // QueueWork is used to add a function that returns an error to the queue.
-func (q *Queuer) QueueWork(work func() error) error {
+func (q *Queuer) QueueWork(work func() error) {
 	writeRequest := WriteRequest{
 		Function: work,
 	}
 	q.queue <- writeRequest
+}
 
-	select {
-	case err := <-q.errorChan:
-		return err
-	default:
-		// No error to report
-		return nil
-	}
+// ErrorChan returns the error channel for the queuer.
+func (q *Queuer) ErrorChan() <-chan error {
+	return q.errorChan
+}
+
+// IsQueueFull checks if the queue is full.
+func (q *Queuer) IsQueueFull() bool {
+	return len(q.queue) == cap(q.queue)
 }

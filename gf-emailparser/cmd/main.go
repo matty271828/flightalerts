@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("unable to get client: %v", err)
 	}
 
-	sheets, err := internalGoogle.NewSheetsService(client, internalGoogle.NewQueuer(1))
+	sheets, err := internalGoogle.NewSheetsService(client, internalGoogle.NewQueuer(100))
 	if err != nil {
 		log.Fatalf("unable to create Sheets service: %v", err)
 	}

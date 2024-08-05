@@ -102,7 +102,8 @@ func (s *SheetsService) AppendFlightData(data []FlightData) error {
 		return nil
 	}
 
-	return s.Queuer.QueueWork(work)
+	s.Queuer.QueueWork(work)
+	return nil
 }
 
 // MessageMetaData is a custom type used to serve metadata
@@ -140,7 +141,8 @@ func (s *SheetsService) MarkMessageAsRead(id string, internalDate int64) error {
 		return nil
 	}
 
-	return s.Queuer.QueueWork(work)
+	s.Queuer.QueueWork(work)
+	return nil
 }
 
 // GetLatestProcessedMessage is used to find the last previously read message in order
