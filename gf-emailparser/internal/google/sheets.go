@@ -72,7 +72,7 @@ func prepareFlightDataForSheet(data []FlightData) [][]interface{} {
 	var result [][]interface{}
 	for _, fd := range data {
 		result = append(result, []interface{}{
-			fd.Date, fd.Type, fd.Airline, fd.Origin, fd.Destination, fd.Duration, fd.URL, fd.Price,
+			fd.Date, fd.Type, fd.Airline, fd.Origin, fd.Destination, fd.Duration, fd.URL, fd.Price, fd.Discount,
 		})
 	}
 	return result

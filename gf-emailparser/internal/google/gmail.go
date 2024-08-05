@@ -127,8 +127,6 @@ func extractFlightData(content string) *[]FlightData {
 		combinedLines string
 	)
 
-	//fmt.Println(content)
-
 	// Regular expressions to extract required fields
 	reDate := regexp.MustCompile(`\b(\w{3}, \w{3} \d{1,2})\b`)
 	reAirline := regexp.MustCompile(`\b(\w+(?: \w+)?) · Nonstop`)
