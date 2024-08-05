@@ -51,13 +51,11 @@ func main() {
 		log.Fatalf("unable to create API service: %v", err)
 	}
 
-	webServer, err := server.NewServer(api)
+	// Start the full server service.
+	err = server.NewServer(api)
 	if err != nil {
 		log.Fatalf("unable to create Server service: %v", err)
 	}
-
-	// Register the API endpoints.
-	webServer.RegisterEndpoints()
 
 	// run job to read emails
 	err = jobs.ReadEmailsJob()

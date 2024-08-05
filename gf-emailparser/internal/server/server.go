@@ -21,10 +21,14 @@ const (
 // NewServer is used to initialise a new instance of the server
 func NewServer(
 	api *api.API,
-) (*Server, error) {
-	return &Server{
+) error {
+	server := Server{
 		API: api,
-	}, nil
+	}
+
+	server.RegisterEndpoints()
+
+	return nil
 }
 
 func Start() {
