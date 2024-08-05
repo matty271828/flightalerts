@@ -101,20 +101,23 @@ func (g *GmailService) GetMessageContent(payload *gmail.MessagePart) string {
 
 // ExtractFlightData is used to return the flight data contained
 // within a gmail flight alert.
-func (g *GmailService) ExtractFlightData(message *gmail.Message) (*[]FlightData, error) {
+func (g *GmailService) ExtractFlightData(message *gmail.Message) (*MessageMetaData, *[]FlightData, error) {
 	// Retrieve the full message
 	fullMessage, err := g.GetMessage("me", message.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve message: %v", err)
+		return nil, nil, fmt.Errorf("failed to retrieve message: %v", err)
 	}
 
 	// Print the entire message payload
 	content := g.GetMessageContent(fullMessage.Payload)
 	if content == "" {
-		return nil, fmt.Errorf("no plain text content found in the message")
+		return nil, nil, fmt.Errorf("no plain text content found in the message")
 	}
 
-	return extractFlightData(content), nil
+	return &MessageMetaData{
+		ID:           fullMessage.Id,
+		InternalDate: fullMessage.InternalDate,
+	}, extractFlightData(content), nil
 }
 
 // ExtractFlightData parses the message content and extracts flight data

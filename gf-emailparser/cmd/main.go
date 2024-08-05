@@ -5,6 +5,7 @@ import (
 	"log"
 
 	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
+	"github.com/matty271828/flightalerts/gf-emailparser/internal/jobs"
 	"github.com/matty271828/flightalerts/gf-emailparser/internal/server"
 
 	"github.com/joho/godotenv"
@@ -22,41 +23,24 @@ func main() {
 	// Use the client after manual OAuth authentication
 	client, err := internalGoogle.GetClient(oauthConfig)
 	if err != nil {
-		log.Fatalf("Unable to get client: %v", err)
+		log.Fatalf("unable to get client: %v", err)
 	}
 
 	sheets, err := internalGoogle.NewSheetsService(client)
 	if err != nil {
-		log.Fatalf("Unable to create Sheets service: %v", err)
+		log.Fatalf("unable to create Sheets service: %v", err)
 	}
 
 	gmail, err := internalGoogle.NewGmailService(client, sheets)
 	if err != nil {
-		log.Fatalf("Unable to create Gmail service: %v", err)
+		log.Fatalf("unable to create Gmail service: %v", err)
 	}
 
-	// Example usage of GmailService
-	messages, err := gmail.ListNewMessages("me")
+	jobs := jobs.NewJobs(gmail, sheets)
+
+	// run job to read emails
+	err = jobs.ReadEmailsJob()
 	if err != nil {
-		log.Fatalf("Unable to list new messages: %v", err)
-	}
-
-	if len(messages) == 0 {
-		log.Println("No new messages found.")
-		return
-	}
-
-	data, err := gmail.ExtractFlightData(messages[5])
-	if err != nil {
-		log.Fatalf("Failed to extract flight data from email: %v", err)
-	}
-
-	err = gmail.Sheets.MarkMessageAsRead(messages[5].Id, messages[5].InternalDate)
-	if err != nil {
-		log.Fatalf("Failed to mark message as read: %v", err)
-	}
-
-	if err := sheets.AppendFlightData(*data); err != nil {
-		log.Fatalf("Unable to write data to sheet: %v", err)
+		log.Fatalf("failed to run read emails job: %v", err)
 	}
 }
