@@ -42,6 +42,30 @@ type FlightData struct {
 	Discount    string
 }
 
+// validateFlightData is used to validate that all fields in a struct of
+// FlightData have been populated. The exception is discounts, which is optional.
+func (f *FlightData) validateFlightData() bool {
+	switch {
+	case f.Date == "":
+		return false
+	case f.Type == "":
+		return false
+	case f.Airline == "":
+		return false
+	case f.Origin == "":
+		return false
+	case f.Destination == "":
+		return false
+	case f.Duration == "":
+		return false
+	case f.URL == "":
+		return false
+	case f.Price == "":
+		return false
+	}
+	return true
+}
+
 // prepareDataForSheets is used to transform the custom type FlightData
 // into a format expected by google sheets.
 func prepareFlightDataForSheet(data []FlightData) [][]interface{} {

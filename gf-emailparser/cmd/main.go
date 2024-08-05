@@ -46,7 +46,7 @@ func main() {
 		return
 	}
 
-	data, err := gmail.ExtractFlightData(messages[0])
+	data, err := gmail.ExtractFlightData(messages[5])
 	if err != nil {
 		log.Fatalf("Failed to extract flight data from email: %v", err)
 	}

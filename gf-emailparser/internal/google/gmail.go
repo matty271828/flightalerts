@@ -112,10 +112,7 @@ func (g *GmailService) ExtractFlightData(message *gmail.Message) (*[]FlightData,
 
 	// Print the entire message payload
 	content := g.GetMessageContent(fullMessage.Payload)
-	if content != "" {
-		fmt.Println("Message Content:")
-		fmt.Println(content)
-	} else {
+	if content == "" {
 		return nil, fmt.Errorf("no plain text content found in the message")
 	}
 
@@ -130,12 +127,14 @@ func extractFlightData(content string) *[]FlightData {
 		combinedLines string
 	)
 
+	//fmt.Println(content)
+
 	// Regular expressions to extract required fields
 	reDate := regexp.MustCompile(`\b(\w{3}, \w{3} \d{1,2})\b`)
 	reAirline := regexp.MustCompile(`\b(\w+(?: \w+)?) · Nonstop`)
 	reOriginDestination := regexp.MustCompile(`· (\w{3})–(\w{3}) ·`)
 	reDuration := regexp.MustCompile(`· (\d+ hr)`)
-	reURL := regexp.MustCompile(`View\s*\((https?://[^\s)]+)\)`)
+	reURL := regexp.MustCompile(`\((https?://[^\s)]+)\)`)
 	rePrice := regexp.MustCompile(`From £(\d+)`)
 	reDiscount := regexp.MustCompile(`SAVE (\d+%)`)
 
@@ -143,7 +142,6 @@ func extractFlightData(content string) *[]FlightData {
 	lines := strings.Split(content, "\n")
 
 	for _, line := range lines {
-		// Extract and set the Date
 		if match := reDate.FindString(line); match != "" {
 			// Initialize a new FlightData instance here since the date
 			// acts as a header for a new flight in gmail flight alerts.
@@ -174,12 +172,6 @@ func extractFlightData(content string) *[]FlightData {
 			flight.Duration = match[1]
 		}
 
-		// Extract and set the URL
-		if match := reURL.FindStringSubmatch(line); len(match) > 1 {
-			flight.URL = match[1]
-			flights = append(flights, flight)
-		}
-
 		// Start combining lines after detecting "View"
 		if strings.Contains(line, "View") {
 			combinedLines = line
@@ -191,14 +183,15 @@ func extractFlightData(content string) *[]FlightData {
 			// Extract the URL, ensuring to remove unwanted parts
 			if match := reURL.FindString(combinedLines); match != "" {
 				// Clean the URL from "View" and brackets
-				// TODO: Strip word view from the front of combinedLines
-				//cleanURL := strings.Trim(match, "()")
-
-				flight.URL = match
-
+				cleanURL := strings.Trim(match, "()")
+				flight.URL = cleanURL
 				combinedLines = ""
-				flights = append(flights, flight)
 			}
+		}
+
+		// Extract and set the Discount
+		if match := reDiscount.FindStringSubmatch(line); len(match) > 1 {
+			flight.Discount = match[1]
 		}
 
 		// Extract and set the Price
@@ -206,11 +199,11 @@ func extractFlightData(content string) *[]FlightData {
 			flight.Price = "£" + match[1]
 		}
 
-		// Extract and set the Discount
-		if match := reDiscount.FindStringSubmatch(line); len(match) > 1 {
-			flight.Discount = match[1]
+		if flight.validateFlightData() {
 			flights = append(flights, flight)
+			flight = FlightData{}
 		}
+
 	}
 	return &flights
 }
