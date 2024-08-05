@@ -130,7 +130,8 @@ func extractFlightData(content string) *[]FlightData {
 
 	// Regular expressions to extract required fields
 	reDate := regexp.MustCompile(`\b(\w{3}, \w{3} \d{1,2})\b`)
-	reAirline := regexp.MustCompile(`\b(\w+(?: \w+)?) · Nonstop`)
+	reAirline := regexp.MustCompile(`\b(\w+(?: \w+)?) · (?:Nonstop|\d+ stop(?:s)?)`)
+	reStops := regexp.MustCompile(`· (Nonstop|\d+ stop(?:s)?) ·`)
 	reOriginDestination := regexp.MustCompile(`· (\w{3})–(\w{3}) ·`)
 	reDuration := regexp.MustCompile(`· (\d+ hr)`)
 	reURL := regexp.MustCompile(`\((https?://[^\s)]+)\)`)
@@ -150,6 +151,11 @@ func extractFlightData(content string) *[]FlightData {
 		// TODO: Extract either "one-way" or "return" when we expand to
 		// set up flight alerts for return flights.
 		flight.Type = "OneWay"
+
+		// Extract and set the Stops
+		if match := reStops.FindStringSubmatch(line); len(match) > 1 {
+			flight.Stops = match[1]
+		}
 
 		// Extract and set the Airline
 		if match := reAirline.FindStringSubmatch(line); len(match) > 1 {

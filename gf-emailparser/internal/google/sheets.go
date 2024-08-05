@@ -35,6 +35,7 @@ const (
 type FlightData struct {
 	Date        string
 	Type        string
+	Stops       string
 	Airline     string
 	Origin      string
 	Destination string
@@ -49,6 +50,8 @@ type FlightData struct {
 func (f *FlightData) validateFlightData() bool {
 	switch {
 	case f.Date == "":
+		return false
+	case f.Type == "":
 		return false
 	case f.Type == "":
 		return false
@@ -74,7 +77,7 @@ func prepareFlightDataForSheet(data []FlightData) [][]interface{} {
 	var result [][]interface{}
 	for _, fd := range data {
 		result = append(result, []interface{}{
-			fd.Date, fd.Type, fd.Airline, fd.Origin, fd.Destination, fd.Duration, fd.URL, fd.Price, fd.Discount,
+			fd.Date, fd.Type, fd.Stops, fd.Airline, fd.Origin, fd.Destination, fd.Duration, fd.URL, fd.Price, fd.Discount,
 		})
 	}
 	return result
