@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/google/uuid"
 	sheets "google.golang.org/api/sheets/v4"
@@ -28,7 +29,7 @@ func NewSheetsService(client *http.Client) (*SheetsService, error) {
 const (
 	allFlights   = "all_flights"
 	readMessages = "read_messages"
-	lastRead     = "last_read"
+	cutoff       = "cutoff"
 )
 
 // FlightData is a custom type used to serve flight information
@@ -109,7 +110,7 @@ func (s *SheetsService) AppendFlightData(data []FlightData) error {
 // used to ensure FlightData is not duplicated when parsing emails.
 type MessageMetaData struct {
 	ID           string
-	InternalDate int64
+	InternalDate string
 }
 
 // prepareMessageMetaDataForSheet is used to transform a single ID
@@ -122,7 +123,7 @@ func prepareMessageMetaDataForSheet(metaData *MessageMetaData) [][]interface{} {
 
 // MarkMessageAsRead is used to add a message id and date of the message
 // to a sheet tracking previously read messages.
-func (s *SheetsService) MarkMessageAsRead(id string, internalDate int64) error {
+func (s *SheetsService) MarkMessageAsRead(id string, internalDate string) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
 	rangeToWrite := readMessages + "!A1" // Starting range, append will handle the rest
 
@@ -145,7 +146,7 @@ func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate int64) error
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
 	rangeToWrite := readMessages + "!A2:B2"
 
-	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
+	metaData := MessageMetaData{ID: id, InternalDate: strconv.FormatInt(internalDate, 10)}
 	values := prepareMessageMetaDataForSheet(&metaData)
 	vr := &sheets.ValueRange{Values: values}
 
@@ -159,47 +160,28 @@ func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate int64) error
 
 // GetLatestProcessedMessage is used to find the last previously read message in order
 // to act as a cutoff for reading emails.
+// GetCutoffMessageMetadata retrieves the metadata of the cutoff message, which
+// is always stored in the second row. The cutoff message is used as a marking
+// point to stop reading previously read emails.
 func (s *SheetsService) GetCutoffMessageMetadata() (*MessageMetaData, error) {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
-
-	// Get the sheet metadata to find the total number of rows
-	sheetMetadata, err := s.Service.Spreadsheets.Get(spreadsheetId).Fields("sheets(properties(sheetId,title,gridProperties(rowCount)))").Do()
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve sheet metadata: %v", err)
-	}
-
-	var totalRows int64
-	for _, sheet := range sheetMetadata.Sheets {
-		if sheet.Properties.Title == lastRead {
-			totalRows = sheet.Properties.GridProperties.RowCount
-			break
-		}
-	}
-
-	if totalRows == 0 {
-		return nil, fmt.Errorf("no data found in sheet")
-	}
-
-	// Construct the range to read the last row
-	rangeToRead := fmt.Sprintf("%s!A%d:B%d", lastRead, totalRows, totalRows)
+	rangeToRead := fmt.Sprintf("%s!A2:B2", cutoff) // Targeting the second row
 
 	resp, err := s.Service.Spreadsheets.Values.Get(spreadsheetId, rangeToRead).MajorDimension("ROWS").Do()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve data from sheet: %v", err)
 	}
 
-	// No error since this indicates that no messages have been read yet.
-	if len(resp.Values) == 0 {
+	// No error since this indicates that the second row might be empty
+	if len(resp.Values) == 0 || len(resp.Values[0]) < 1 {
+		// If the second row is empty or incomplete, return nil
 		return nil, nil
 	}
 
 	latestRow := resp.Values[0]
-	if len(latestRow) < 1 {
-		return nil, fmt.Errorf("incomplete data in the last row")
-	}
-
 	messageMetaData := &MessageMetaData{
-		ID: fmt.Sprintf("%v", latestRow[0]),
+		ID:           fmt.Sprintf("%v", latestRow[0]),
+		InternalDate: fmt.Sprintf("%v", latestRow[1]),
 	}
 
 	return messageMetaData, nil

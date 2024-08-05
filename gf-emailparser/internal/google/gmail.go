@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"google.golang.org/api/gmail/v1"
@@ -28,6 +29,8 @@ func NewGmailService(client *http.Client, sheets *SheetsService) (*GmailService,
 
 // ListNewMessages is used to return all currently unread flight alert emails in the inbox.
 func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
+	var newMessages []*gmail.Message
+
 	// Retrieve the latest processed message metadata
 	cutoff, err := g.Sheets.GetCutoffMessageMetadata()
 	if err != nil {
@@ -37,7 +40,11 @@ func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 	// If there is a cutoff message, use its internalDate to filter newer messages
 	var query string
 	if cutoff != nil {
-		query = fmt.Sprintf(" after:%d", cutoff.InternalDate/1000)
+		num, err := strconv.ParseInt(cutoff.InternalDate, 10, 64) // Base 10 conversion with 64-bit integer
+		if err != nil {
+			return nil, fmt.Errorf("error parsing string: %v", err)
+		}
+		query = fmt.Sprintf(" after:%d", num/1000)
 	}
 
 	// Retrieve messages from Gmail
@@ -46,19 +53,7 @@ func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 		return nil, fmt.Errorf("unable to retrieve messages: %v", err)
 	}
 
-	// Create a map of processed message IDs for quick lookup
-	processedMessageMap := make(map[string]struct{})
-	if cutoff != nil {
-		processedMessageMap[cutoff.ID] = struct{}{}
-	}
-
-	// Filter out messages that have already been processed
-	var newMessages []*gmail.Message
-	for _, msg := range r.Messages {
-		if _, processed := processedMessageMap[msg.Id]; !processed {
-			newMessages = append(newMessages, msg)
-		}
-	}
+	newMessages = append(newMessages, r.Messages...)
 
 	return newMessages, nil
 }
@@ -116,7 +111,7 @@ func (g *GmailService) ExtractFlightData(message *gmail.Message) (*MessageMetaDa
 
 	return &MessageMetaData{
 		ID:           fullMessage.Id,
-		InternalDate: fullMessage.InternalDate,
+		InternalDate: strconv.FormatInt(fullMessage.InternalDate, 10),
 	}, extractFlightData(content), nil
 }
 
