@@ -4,6 +4,7 @@ package main
 import (
 	"log"
 
+	"github.com/matty271828/flightalerts/gf-emailparser/internal/api"
 	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
 	"github.com/matty271828/flightalerts/gf-emailparser/internal/jobs"
 	"github.com/matty271828/flightalerts/gf-emailparser/internal/server"
@@ -16,8 +17,12 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Start OAuth server
-	oauthConfig := server.InitOAuth()
+	// Initialise OAuth config
+	oauthConfig := internalGoogle.InitOAuth()
+
+	// Start the web server. A limited start is needed here in order to authenticate
+	// with google before retrieving the google client. Later we will initialise the
+	// full server service including our custom APIs.
 	go server.Start()
 
 	// Use the client after manual OAuth authentication
@@ -36,7 +41,23 @@ func main() {
 		log.Fatalf("unable to create Gmail service: %v", err)
 	}
 
-	jobs := jobs.NewJobs(gmail, sheets)
+	jobs, err := jobs.NewJobs(gmail, sheets)
+	if err != nil {
+		log.Fatalf("unable to create Jobs service: %v", err)
+	}
+
+	api, err := api.NewAPI(jobs)
+	if err != nil {
+		log.Fatalf("unable to create API service: %v", err)
+	}
+
+	webServer, err := server.NewServer(api)
+	if err != nil {
+		log.Fatalf("unable to create Server service: %v", err)
+	}
+
+	// Register the API endpoints.
+	webServer.RegisterEndpoints()
 
 	// run job to read emails
 	err = jobs.ReadEmailsJob()
