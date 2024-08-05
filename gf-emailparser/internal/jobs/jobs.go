@@ -15,14 +15,14 @@ type Jobs struct {
 	Wg     *sync.WaitGroup
 }
 
-func NewJobs(gmail *google.GmailService, sheets *google.SheetsService) *Jobs {
+func NewJobs(gmail *google.GmailService, sheets *google.SheetsService) (*Jobs, error) {
 	wg := sync.WaitGroup{}
 
 	return &Jobs{
 		Gmail:  gmail,
 		Sheets: sheets,
 		Wg:     &wg,
-	}
+	}, nil
 }
 
 // ReadEmailsJob is used to access the gmail inbox, read all unread emails

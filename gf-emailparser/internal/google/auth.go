@@ -10,7 +10,48 @@ import (
 	"os"
 
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
+
+var (
+	oauthConfig *oauth2.Config
+	oauthState  string
+)
+
+func InitOAuth() *oauth2.Config {
+	// Initialize OAuth
+	oauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("REDIRECT_URL"),
+		Endpoint:     google.Endpoint,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/gmail.readonly",
+			"https://www.googleapis.com/auth/spreadsheets",
+		},
+	}
+	oauthState = "state-token" // This should be a random unique string in production
+	return oauthConfig
+}
+
+func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling google callback")
+	if r.FormValue("state") != oauthState {
+		http.Error(w, "State parameter doesn't match", http.StatusBadRequest)
+		return
+	}
+
+	code := r.FormValue("code")
+	token, err := oauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		http.Error(w, "Code exchange failed", http.StatusInternalServerError)
+		return
+	}
+
+	saveToken("token.json", token)
+
+	fmt.Fprintf(w, "OAuth2 Token saved successfully")
+}
 
 // GetClient returns an HTTP client based on OAuth 2.0 configuration and saved token.
 func GetClient(config *oauth2.Config) (*http.Client, error) {
@@ -18,7 +59,7 @@ func GetClient(config *oauth2.Config) (*http.Client, error) {
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok = getTokenFromWeb(config)
-		SaveToken(tokFile, tok)
+		saveToken(tokFile, tok)
 	}
 	return config.Client(context.Background(), tok), nil
 }
@@ -36,7 +77,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 // saveToken saves the token to a file.
-func SaveToken(path string, token *oauth2.Token) {
+func saveToken(path string, token *oauth2.Token) {
 	log.Printf("Saving credential file to: %s\n", path)
 	f, err := os.Create(path)
 	if err != nil {
