@@ -102,29 +102,27 @@ func (s *SheetsService) AppendFlightData(data []FlightData) error {
 // on already read emails to Google Sheets. This metadata is then
 // used to ensure FlightData is not duplicated when parsing emails.
 type MessageMetaData struct {
-	ID        string
-	Timestamp string
+	ID           string
+	InternalDate int64
 }
 
-// prepareMessageMetaDataForSheet is used to transform the custom type MessageMetaData
+// prepareMessageMetaDataForSheet is used to transform a single ID
 // into a format expected by Google Sheets.
-func prepareMessageMetaDataForSheet(data []MessageMetaData) [][]interface{} {
-	var result [][]interface{}
-	for _, md := range data {
-		result = append(result, []interface{}{
-			md.ID, md.Timestamp,
-		})
+func prepareMessageMetaDataForSheet(metaData *MessageMetaData) [][]interface{} {
+	return [][]interface{}{
+		{metaData.ID, metaData.InternalDate},
 	}
-	return result
 }
 
-// AppendMessageMetaData is used to add row(s) of MessageMetaData to the
+// MarkMessageAsRead is used to add a row with the provided ID to the
 // specified sheet in Google Sheets.
-func (s *SheetsService) AppendMessageMetaData(data []MessageMetaData, sheetName string) error {
+func (s *SheetsService) MarkMessageAsRead(id string, internalDate int64) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
-	rangeToWrite := sheetName + "!A1" // Starting range, append will handle the rest
+	rangeToWrite := readMessages + "!A1" // Starting range, append will handle the rest
+
 	// Prepare the data for appending
-	values := prepareMessageMetaDataForSheet(data)
+	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
+	values := prepareMessageMetaDataForSheet(&metaData)
 
 	vr := &sheets.ValueRange{
 		Values: values,
@@ -140,7 +138,7 @@ func (s *SheetsService) AppendMessageMetaData(data []MessageMetaData, sheetName 
 
 // GetLatestProcessedMessage is used to find the last previously read message in order
 // to act as a cutoff for reading emails.
-func (s *SheetsService) GetLatestProcessedMessageMetadata() (*MessageMetaData, error) {
+func (s *SheetsService) GetLatestReadMessageMetadata() (*MessageMetaData, error) {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
 
 	// Get the sheet metadata to find the total number of rows
@@ -175,13 +173,12 @@ func (s *SheetsService) GetLatestProcessedMessageMetadata() (*MessageMetaData, e
 	}
 
 	latestRow := resp.Values[0]
-	if len(latestRow) < 2 {
+	if len(latestRow) < 1 {
 		return nil, fmt.Errorf("incomplete data in the last row")
 	}
 
 	messageMetaData := &MessageMetaData{
-		ID:        fmt.Sprintf("%v", latestRow[0]),
-		Timestamp: fmt.Sprintf("%v", latestRow[1]),
+		ID: fmt.Sprintf("%v", latestRow[0]),
 	}
 
 	return messageMetaData, nil

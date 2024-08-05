@@ -51,6 +51,11 @@ func main() {
 		log.Fatalf("Failed to extract flight data from email: %v", err)
 	}
 
+	err = gmail.Sheets.MarkMessageAsRead(messages[5].Id, messages[5].InternalDate)
+	if err != nil {
+		log.Fatalf("Failed to mark message as read: %v", err)
+	}
+
 	if err := sheets.AppendFlightData(*data); err != nil {
 		log.Fatalf("Unable to write data to sheet: %v", err)
 	}

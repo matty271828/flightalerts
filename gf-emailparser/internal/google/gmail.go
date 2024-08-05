@@ -29,29 +29,27 @@ func NewGmailService(client *http.Client, sheets *SheetsService) (*GmailService,
 // ListNewMessages is used to return all currently unread flight alert emails in the inbox.
 func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 	// Retrieve the latest processed message metadata
-	processedMetadata, err := g.Sheets.GetLatestProcessedMessageMetadata()
+	lastRead, err := g.Sheets.GetLatestReadMessageMetadata()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve latest processed message metadata: %v", err)
 	}
 
-	// Prepare the query to fetch messages after the latest processed timestamp
+	// If there is a lastRead message, use its internalDate to filter newer messages
 	var query string
-	if processedMetadata != nil {
-		query = fmt.Sprintf("after:%s", processedMetadata.Timestamp)
-	} else {
-		query = "" // No filter if no previous metadata is available
+	if lastRead != nil {
+		query = fmt.Sprintf(" after:%d", lastRead.InternalDate/1000)
 	}
 
 	// Retrieve messages from Gmail
-	r, err := g.Service.Users.Messages.List(user).Q(query).MaxResults(100).Do()
+	r, err := g.Service.Users.Messages.List(user).Q(query).Do()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve messages: %v", err)
 	}
 
 	// Create a map of processed message IDs for quick lookup
 	processedMessageMap := make(map[string]struct{})
-	if processedMetadata != nil {
-		processedMessageMap[processedMetadata.ID] = struct{}{}
+	if lastRead != nil {
+		processedMessageMap[lastRead.ID] = struct{}{}
 	}
 
 	// Filter out messages that have already been processed
