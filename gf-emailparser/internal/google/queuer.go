@@ -31,14 +31,13 @@ func NewQueuer(workerCount int) *Queuer {
 }
 
 func (q *Queuer) worker() {
-	rateLimiter := time.NewTicker(time.Minute / 60) // 60 writes per minute
-	defer rateLimiter.Stop()
-
 	for req := range q.queue {
-		<-rateLimiter.C
+		// Introduce a delay to throttle requests
+		time.Sleep(time.Second)
+
 		err := req.Function()
 		if err != nil {
-			if req.RetryCount < 3 { // Retry up to 3 times
+			if req.RetryCount < 3 {
 				req.RetryCount++
 				q.queue <- req
 			} else {
