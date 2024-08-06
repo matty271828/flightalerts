@@ -13,6 +13,11 @@ jobs:
 
     - name: Build Go binary with static linking
       uses: ./.github/actions/build_go_binary
+      with:
+        client_id: ${{ secrets.CLIENT_ID }}
+        client_secret: ${{ secrets.CLIENT_SECRET }}
+        redirect_url: ${{ secrets.REDIRECT_URL }}
+        spreadsheet_id: ${{ secrets.SPREADSHEET_ID }}
 
     - name: Deploy Go binary to Digital Ocean
       uses: ./.github/actions/deploy_go_to_do

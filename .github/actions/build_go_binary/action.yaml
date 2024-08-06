@@ -1,6 +1,20 @@
 name: 'Build Go Binary'
 description: 'Build Go Binary'
 
+inputs:
+  client_id:
+    description: 'Client ID'
+    required: true
+  client_secret:
+    description: 'Client Secret'
+    required: true
+  redirect_url:
+    description: 'Redirect URL'
+    required: true
+  spreadsheet_id:
+    description: 'Spreadsheet ID'
+    required: true
+
 runs:
   using: 'composite'
   steps:
@@ -14,10 +28,10 @@ runs:
 
     - name: Build Go binary with static linking
       env:
-        CLIENT_ID: ${{ secrets.CLIENT_ID }}
-        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-        REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
-        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+        CLIENT_ID: ${{ inputs.client_id }}
+        CLIENT_SECRET: ${{ inputs.client_secret }}
+        REDIRECT_URL: ${{ inputs.redirect_url }}
+        SPREADSHEET_ID: ${{ inputs.spreadsheet_id }}
       run: |
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o bin/gf-emailparser-binary
       shell: bash
