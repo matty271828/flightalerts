@@ -33,7 +33,13 @@ runs:
         "
 
         # Remove the old binary
-        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo rm -f /usr/local/bin/gf-emailparser-binary && echo 'Old binary removed successfully'"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
+        if [ -f /usr/local/bin/gf-emailparser-binary ]; then
+            sudo rm -f /usr/local/bin/gf-emailparser-binary && echo 'Old binary removed successfully'
+        else
+            echo 'gf-emailparser-binary does not exist in /usr/local/bin'
+        fi
+        "
 
         echo "Uploading Go binary to $DROPLET_IP..."
 
