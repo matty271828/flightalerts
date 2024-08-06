@@ -70,8 +70,19 @@ runs:
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
         export CLIENT_ID=${{ secrets.CLIENT_ID }}
         export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
-        export REDIRECT_URL=${{ secrets.REDIRECT_URL }}
-        export SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
+        export REDIRECT_URL=${{ vars.REDIRECT_URL }}
+        export SPREADSHEET_ID=${{ vars.SPREADSHEET_ID }}
+        EOF
+
+        # Check and set permissions for tokens.json if it exists
+        echo 'Checking and setting permissions for tokens.json'
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
+        if [ -f /root/gf-emailparser/tokens.json ]; then
+            echo 'tokens.json exists, setting permissions'
+            sudo chmod 600 /root/gf-emailparser/tokens.json
+        else
+            echo 'tokens.json does not exist'
+        fi
         EOF
 
         # Enable and start the service
