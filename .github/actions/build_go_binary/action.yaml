@@ -13,6 +13,11 @@ runs:
         go-version: '1.22.1'
 
     - name: Build Go binary with static linking
+      env:
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
       run: |
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o bin/gf-emailparser-binary
       shell: bash
