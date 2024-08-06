@@ -157,7 +157,7 @@ func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate string) erro
 	return nil
 }
 
-// GetLatestProcessedMessage is used to find the last previously read message in order
+// GetCutoffMessageMetadata is used to find the last previously read message in order
 // to act as a cutoff for reading emails.
 // GetCutoffMessageMetadata retrieves the metadata of the cutoff message, which
 // is always stored in the second row. The cutoff message is used as a marking

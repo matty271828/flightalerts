@@ -53,6 +53,19 @@ func (g *GmailService) ListNewMessages(user string) ([]*gmail.Message, error) {
 		return nil, fmt.Errorf("unable to retrieve messages: %v", err)
 	}
 
+	// Gmail after queuries are inclusive of the after parameter,
+	// so we must check for the cutoff message manually and remove it
+	// so as to not extract it's data twice.
+	if cutoff != nil && len(r.Messages) > 0 {
+		if r.Messages[0].Id == cutoff.ID {
+			r.Messages = r.Messages[1:]
+		}
+		// Recheck length in case the first message was the cutoff
+		if len(r.Messages) > 0 && r.Messages[len(r.Messages)-1].Id == cutoff.ID {
+			r.Messages = r.Messages[:len(r.Messages)-1]
+		}
+	}
+
 	newMessages = append(newMessages, r.Messages...)
 
 	return newMessages, nil
