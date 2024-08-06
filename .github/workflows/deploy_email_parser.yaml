@@ -16,11 +16,11 @@ jobs:
       with:
         client_id: ${{ secrets.CLIENT_ID }}
         client_secret: ${{ secrets.CLIENT_SECRET }}
-        redirect_url: ${{ secrets.REDIRECT_URL }}
-        spreadsheet_id: ${{ secrets.SPREADSHEET_ID }}
+        redirect_url: ${{ vars.REDIRECT_URL }}
+        spreadsheet_id: ${{ vars.SPREADSHEET_ID }}
 
     - name: Deploy Go binary to Digital Ocean
       uses: ./.github/actions/deploy_go_to_do
       with:
         do_ssh_private_key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
-        droplet_ip: ${{ secrets.DROPLET_IP }}
+        droplet_ip: ${{ vars.DROPLET_IP }}
