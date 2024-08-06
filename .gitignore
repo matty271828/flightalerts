@@ -168,3 +168,5 @@ google.env
 bin/
 
 token.json
+
+app.pid
