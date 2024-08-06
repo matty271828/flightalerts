@@ -24,6 +24,9 @@ runs:
         # Create the necessary directories
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /var/www/gf-emailparser /usr/local/bin /root/gf-emailparser"
 
+        # Create a placeholder .env file
+        echo "PLACEHOLDER=true" | ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "cat > /root/gf-emailparser/.env"
+
         # Stop the service if it exists
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
         if systemctl list-unit-files | grep -q gf-emailparser.service; then
