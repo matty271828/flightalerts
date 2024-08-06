@@ -22,7 +22,7 @@ runs:
         DROPLET_IP: ${{ inputs.droplet_ip }}
       run: |
         # Create the necessary directories
-        ssh -o StrictHostKeyChecking=no root@$ip "mkdir -p /var/www/gf-emailparser"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /var/www/gf-emailparser"
 
         # Stop the Go binary service
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo systemctl stop gf-emailparser && echo 'Service stopped successfully'"
@@ -33,15 +33,15 @@ runs:
         echo "Uploading Go binary to $DROPLET_IP..."
 
         # Create the binary directory if not already present
-        ssh -o StrictHostKeyChecking=no root@$ip "mkdir -p /usr/local/bin && echo 'Binary directory created'"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /usr/local/bin && echo 'Binary directory created'"
 
         # Set the correct permissions
         echo 'Setting permissions'
-        ssh -o StrictHostKeyChecking=no root@$ip "chown -R www-data:www-data /var/www/gf-emailparser && chmod -R 755 /var/www/gf-emailparser && chmod +x /usr/local/bin/gf-emailparser-binary"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "chown -R www-data:www-data /var/www/gf-emailparser && chmod -R 755 /var/www/gf-emailparser && chmod +x /usr/local/bin/gf-emailparser-binary"
 
         # Create the log files
         echo 'Creating log files'
-        ssh -o StrictHostKeyChecking=no root@$ip "mkdir -p /root/gf-emailparser && touch /root/gf-emailparser/logfile.log /root/gf-emailparser/error.log"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /root/gf-emailparser && touch /root/gf-emailparser/logfile.log /root/gf-emailparser/error.log"
 
         # Deploy the Go binary
         echo 'Deploying Go binary'
@@ -49,13 +49,13 @@ runs:
         
         # Upload the systemd service file
         echo 'Uploading systemd service file'
-        scp -o StrictHostKeyChecking=no ./flightalerts/configs/systemd/gf-emailparser.service root@$ip:/etc/systemd/system/gf-emailparser.service
+        scp -o StrictHostKeyChecking=no ./flightalerts/configs/systemd/gf-emailparser.service root@$DROPLET_IP:/etc/systemd/system/gf-emailparser.service
         
         # Set correct permissions for the systemd service file
         echo 'Set correct permissions for the systemd service file'
-        ssh -o StrictHostKeyChecking=no root@$ip "chmod 644 /etc/systemd/system/gf-emailparser.service"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "chmod 644 /etc/systemd/system/gf-emailparser.service"
         
         # Enable and start the service
         echo 'Enable and start the service'
-        ssh -o StrictHostKeyChecking=no root@$ip "systemctl daemon-reload && systemctl enable gf-emailparser.service && systemctl start gf-emailparser.service"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "systemctl daemon-reload && systemctl enable gf-emailparser.service && systemctl start gf-emailparser.service"
       shell: bash
