@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/google/uuid"
 	sheets "google.golang.org/api/sheets/v4"
@@ -142,11 +141,11 @@ func (s *SheetsService) MarkMessageAsRead(id string, internalDate string) error 
 // MarkMessageAsCutoff is used to save the metadata of the cutoff message.
 // The cutoff message is the first read message of the previous run, so for subsequent
 // runs we do not need to keep reading once we reach it.
-func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate int64) error {
+func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate string) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
 	rangeToWrite := readMessages + "!A2:B2"
 
-	metaData := MessageMetaData{ID: id, InternalDate: strconv.FormatInt(internalDate, 10)}
+	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
 	values := prepareMessageMetaDataForSheet(&metaData)
 	vr := &sheets.ValueRange{Values: values}
 

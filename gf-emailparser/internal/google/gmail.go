@@ -97,7 +97,9 @@ func (g *GmailService) GetMessageContent(payload *gmail.MessagePart) string {
 // ExtractFlightData is used to return the flight data contained
 // within a gmail flight alert.
 func (g *GmailService) ExtractFlightData(message *gmail.Message) (*MessageMetaData, *[]FlightData, error) {
-	// Retrieve the full message
+	// Retrieve the full message - we have to do this since the
+	// message snippets returned by the listing query do not
+	// always have metadata parameters fully  populated.
 	fullMessage, err := g.GetMessage("me", message.Id)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to retrieve message: %v", err)

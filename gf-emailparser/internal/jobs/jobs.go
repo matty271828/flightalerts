@@ -65,17 +65,23 @@ func (j *Jobs) ReadEmailsSubJob() error {
 			return fmt.Errorf("failed to extract flight data from email: %v", err)
 		}
 
+		var (
+			id           = metaData.ID
+			internalDate = metaData.InternalDate
+		)
+
 		if err := j.Sheets.AppendFlightData(*data); err != nil {
 			return fmt.Errorf("unable to write data to sheet: %v", err)
 		}
 
-		err = j.Gmail.Sheets.MarkMessageAsRead(metaData.ID, metaData.InternalDate)
+		err = j.Gmail.Sheets.MarkMessageAsRead(id, internalDate)
 		if err != nil {
 			return fmt.Errorf("failed to mark message as read: %v", err)
 		}
 
 		if i == 0 {
-			err = j.Gmail.Sheets.MarkMessageAsCutoff(metaData.ID, message.InternalDate)
+			fmt.Println("attempting to mark first message as cutoff")
+			err = j.Gmail.Sheets.MarkMessageAsCutoff(id, internalDate)
 			if err != nil {
 				time.Sleep(1 * time.Second)
 				return fmt.Errorf("failed to mark message as cutoff: %v", err)
