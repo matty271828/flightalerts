@@ -1,0 +1,39 @@
+name: 'Deploy_to_droplet'
+description: 'Deploy a Go binary to a single DigitalOcean Droplet'
+
+inputs:
+  do_ssh_private_key:
+    description: 'SSH private key for DigitalOcean'
+    required: true
+  droplet_ip:
+    description: 'DigitalOcean Droplet IP'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ inputs.do_ssh_private_key }}
+
+    - name: Deploy to DigitalOcean
+      env:
+        DROPLET_IP: ${{ inputs.droplet_ip }}
+      run: |
+        # Stop the Go binary service
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo systemctl stop gf-emailparser && echo 'Service stopped successfully'"
+
+        # Remove the old binary
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo rm -f /usr/local/bin/gf-emailparser-binary && echo 'Old binary removed successfully'"
+
+        echo "Uploading Go binary to $DROPLET_IP..."
+
+        # Deploy the Go binary
+        echo 'Deploying Go binary'
+        scp -o StrictHostKeyChecking=no ./gf-emailparser/cmd/bin/gf-emailparser-binary root@$DROPLET_IP:/usr/local/bin/gf-emailparser-binary
+        
+        # Enable and start the service
+        echo 'Enable and start the service'
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "systemctl daemon-reload && systemctl enable gf-emailparser.service && systemctl start gf-emailparser.service"
+      shell: bash
