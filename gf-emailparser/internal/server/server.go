@@ -15,7 +15,7 @@ type Server struct {
 
 const (
 	CallBackURL   = "/callback"
-	ReadEmailsURL = "/ReadEmails"
+	ReadEmailsURL = "/reademails"
 )
 
 // NewServer is used to initialise a new instance of the server
@@ -34,7 +34,7 @@ func NewServer(
 func Start() {
 	http.HandleFunc(CallBackURL, internalGoogle.HandleGoogleCallback)
 	log.Println("Starting web server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	http.ListenAndServe(":8080", nil)
 }
 
 // RegisterEndpoints is used to register endpoints onto the web server

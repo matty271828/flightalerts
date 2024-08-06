@@ -57,12 +57,6 @@ func main() {
 		log.Fatalf("unable to create Server service: %v", err)
 	}
 
-	// run job to read emails
-	err = jobs.ReadEmailsJob()
-	if err != nil {
-		log.Fatalf("failed to run read emails job: %v", err)
-	}
-
-	// Wait for all goroutines to finish
-	jobs.Wg.Wait()
+	// Block forever to keep the service running
+	select {}
 }
