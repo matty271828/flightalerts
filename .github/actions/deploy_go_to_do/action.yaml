@@ -56,7 +56,7 @@ runs:
 
         # Upload the systemd service file
         echo 'Uploading systemd service file'
-        scp -o StrictHostKeyChecking=no ./flightalerts/configs/systemd/gf-emailparser.service root@$DROPLET_IP:/etc/systemd/system/gf-emailparser.service
+        scp -o StrictHostKeyChecking=no ./configs/systemd/system/gf-emailparser.service root@$DROPLET_IP:/etc/systemd/system/gf-emailparser.service
 
         # Set correct permissions for the systemd service file
         echo 'Setting permissions for the systemd service file'
