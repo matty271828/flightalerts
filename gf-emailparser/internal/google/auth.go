@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -35,7 +36,7 @@ func InitOAuth() *oauth2.Config {
 }
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
-	log.Println("Handling google callback")
+	log.Println("Handling Google callback")
 	if r.FormValue("state") != oauthState {
 		http.Error(w, "State parameter doesn't match", http.StatusBadRequest)
 		return
@@ -49,31 +50,75 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	saveToken("token.json", token)
-
 	fmt.Fprintf(w, "OAuth2 Token saved successfully")
 }
 
 // GetClient returns an HTTP client based on OAuth 2.0 configuration and saved token.
+// It waits until the token file is available before proceeding.
 func GetClient(config *oauth2.Config) (*http.Client, error) {
 	tokFile := "token.json"
+	var tok *oauth2.Token
+
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
-		tok = getTokenFromWeb(config)
-		saveToken(tokFile, tok)
+		log.Printf("Error reading token from file: %v", err)
+		return nil, err
 	}
+
+	if tok == nil {
+		// Generate and log the OAuth URL for user authorization
+		authURL := oauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+		log.Printf("Go to the following link in your browser then type the authorization code: \n%v\n", authURL)
+	}
+
+	for {
+		tok, err := tokenFromFile(tokFile)
+		if err != nil {
+			log.Printf("Error reading token from file: %v", err)
+			return nil, err
+		}
+
+		if tok != nil {
+			break
+		}
+
+		log.Println("Token not found, waiting...")
+		time.Sleep(5 * time.Second) // Wait for 5 seconds before checking again
+	}
+
+	log.Println("Token successfully read from file")
 	return config.Client(context.Background(), tok), nil
 }
 
 // tokenFromFile reads a token from a file.
 func tokenFromFile(file string) (*oauth2.Token, error) {
+	log.Printf("Reading token from file: %s", file)
 	f, err := os.Open(file)
-	if err != nil {
+	switch {
+	case err == nil:
+	case os.IsNotExist(err):
+		// File does not exist, return nil token
+		return nil, nil
+	default:
+		log.Printf("Error opening token file: %v", err)
 		return nil, err
 	}
 	defer f.Close()
+
 	tok := &oauth2.Token{}
 	err = json.NewDecoder(f).Decode(tok)
-	return tok, err
+	switch {
+	case err == nil:
+	case err.Error() == "EOF":
+		// File is empty, return nil token
+		return nil, nil
+	default:
+		log.Printf("Error decoding token file: %v", err)
+		return nil, err
+	}
+
+	log.Println("Token successfully decoded")
+	return tok, nil
 }
 
 // saveToken saves the token to a file.
@@ -85,21 +130,4 @@ func saveToken(path string, token *oauth2.Token) {
 	}
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
-}
-
-// getTokenFromWeb retrieves a token from the web.
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	log.Printf("Go to the following link in your browser then type the authorization code: \n%v\n", authURL)
-
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
-	}
-
-	tok, err := config.Exchange(context.TODO(), authCode)
-	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
-	}
-	return tok
 }

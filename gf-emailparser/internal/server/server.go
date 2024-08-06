@@ -27,7 +27,7 @@ func NewServer(
 	}
 
 	server.RegisterEndpoints()
-
+	log.Println("Successfully initialised full web server on :8080")
 	return nil
 }
 
