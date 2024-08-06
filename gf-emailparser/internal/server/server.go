@@ -27,14 +27,14 @@ func NewServer(
 	}
 
 	server.RegisterEndpoints()
-	log.Println("Successfully initialised full web server on :8080")
+	log.Println("Successfully initialised full web server on :9000")
 	return nil
 }
 
 func Start() {
 	http.HandleFunc(CallBackURL, internalGoogle.HandleGoogleCallback)
-	log.Println("Starting web server on :8080")
-	http.ListenAndServe(":8080", nil)
+	log.Println("Starting web server on :9000")
+	http.ListenAndServe(":9000", nil)
 }
 
 // RegisterEndpoints is used to register endpoints onto the web server
