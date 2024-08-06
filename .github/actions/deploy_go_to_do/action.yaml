@@ -65,6 +65,15 @@ runs:
         echo 'Setting permissions for the systemd service file'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "chmod 644 /etc/systemd/system/gf-emailparser.service"
 
+        # Set environment variables for the service
+        echo 'Setting environment variables for the service'
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
+        export CLIENT_ID=${{ secrets.CLIENT_ID }}
+        export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+        export REDIRECT_URL=${{ secrets.REDIRECT_URL }}
+        export SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
+        EOF
+
         # Enable and start the service
         echo 'Enabling and starting the service'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
