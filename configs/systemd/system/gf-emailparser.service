@@ -22,7 +22,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/root/gf-emailparser
-ExecStart=/root/gf-emailparser/bin/gf-emailparser-binary
+ExecStart=/usr/local/bin/gf-emailparser-binary
 Restart=always  # This will ensure the app restarts if it crashes
 StandardOutput=append:/root/gf-emailparser/logfile.log
 StandardError=append:/root/gf-emailparser/error.log  
