@@ -1,0 +1,31 @@
+# ===============================================================================
+# INSTRUCTIONS TO UPDATE THE ai-posters.service FILE
+# ===============================================================================
+# This file has been added to to serve as documentation. Any changes will need
+# to be manually added to the droplet.
+#
+# To add this file back to the digital ocean droplet do the following: 
+# 1. SSH into the droplet - make changes using preferred editor
+# e.g. sudo vim /etc/systemd/system/gf-emailparser.service
+#
+# 2. After editing the file, reload systemd:
+# sudo systemctl daemon-reload
+# sudo systemctl restart gf-emailparser
+#
+# 3. Check status using:
+# sudo systemctl status gf-emailparser
+# ===============================================================================
+[Unit]
+Description=gf-emailparser
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/gf-emailparser
+ExecStart=/root/gf-emailparser/bin/gf-emailparser-binary
+Restart=always  # This will ensure the app restarts if it crashes
+StandardOutput=append:/root/gf-emailparser/logfile.log
+StandardError=append:/root/gf-emailparser/error.log  
+
+[Install]
+WantedBy=multi-user.target
