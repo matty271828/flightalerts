@@ -36,8 +36,14 @@ runs:
         # Create the necessary directories
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /var/www/gf-emailparser /usr/local/bin /root/gf-emailparser"
 
-        # Create a placeholder .env file
-        echo "PLACEHOLDER=true" | ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "cat > /root/gf-emailparser/.env"
+        # Create a placeholder .env file with actual environment variables
+        echo 'Setting environment variables for the service'
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << EOF
+        echo "CLIENT_ID=$CLIENT_ID > /root/gf-emailparser/.env
+        echo "CLIENT_SECRET=$CLIENT_SECRET >> /root/gf-emailparser/.env
+        echo "REDIRECT_URL=$REDIRECT_URL >> /root/gf-emailparser/.env
+        echo "SPREADSHEET_ID=$SPREADSHEET_ID >> /root/gf-emailparser/.env
+        EOF
 
         # Stop the service if it exists
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
@@ -76,15 +82,6 @@ runs:
         # Set correct permissions for the systemd service file
         echo 'Setting permissions for the systemd service file'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "chmod 644 /etc/systemd/system/gf-emailparser.service"
-
-        # Set environment variables for the service
-        echo 'Setting environment variables for the service'
-        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
-        export CLIENT_ID=$CLIENT_ID
-        export CLIENT_SECRET=$CLIENT_SECRET
-        export REDIRECT_URL=$REDIRECT_URL
-        export SPREADSHEET_ID=$SPREADSHEET_ID
-        EOF
 
         # Check and set permissions for tokens.json if it exists
         echo 'Checking and setting permissions for tokens.json'
