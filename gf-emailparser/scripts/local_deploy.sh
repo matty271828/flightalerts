@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Step 1: Load environment variables from .env file
-source .env
-
 # Step 1: Build the binary
 echo "Building the application..."
 cd gf-emailparser
