@@ -24,8 +24,13 @@ runs:
         # Create the necessary directories
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /var/www/gf-emailparser"
 
-        # Stop the Go binary service
-        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo systemctl stop gf-emailparser && echo 'Service stopped successfully'"
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
+        if systemctl list-unit-files | grep -q gf-emailparser.service; then
+            sudo systemctl stop gf-emailparser && echo 'Service stopped successfully'
+        else
+            echo 'gf-emailparser.service does not exist'
+        fi
+        "
 
         # Remove the old binary
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "sudo rm -f /usr/local/bin/gf-emailparser-binary && echo 'Old binary removed successfully'"
