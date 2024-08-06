@@ -143,7 +143,7 @@ func (s *SheetsService) MarkMessageAsRead(id string, internalDate string) error 
 // runs we do not need to keep reading once we reach it.
 func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate string) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
-	rangeToWrite := readMessages + "!A2:B2"
+	rangeToWrite := cutoff + "!A2"
 
 	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
 	values := prepareMessageMetaDataForSheet(&metaData)
