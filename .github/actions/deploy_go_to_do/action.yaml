@@ -8,6 +8,14 @@ inputs:
   droplet_ip:
     description: 'DigitalOcean Droplet IP'
     required: true
+  client_id:
+    required: true
+  client_secret:
+    required: true
+  redirect_url:
+    required: true
+  spreadsheet_id:
+    required: true
 
 runs:
   using: 'composite'
@@ -20,6 +28,10 @@ runs:
     - name: Deploy to DigitalOcean
       env:
         DROPLET_IP: ${{ inputs.droplet_ip }}
+        CLIENT_ID: ${{ inputs.client_id }}
+        CLIENT_SECRET: ${{ inputs.client_id }}
+        REDIRECT_URL: ${{ inputs.redirect_url }}
+        SPREADSHEET_ID: ${{ inputs.spreadsheet_id }}
       run: |
         # Create the necessary directories
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p /var/www/gf-emailparser /usr/local/bin /root/gf-emailparser"
@@ -68,10 +80,10 @@ runs:
         # Set environment variables for the service
         echo 'Setting environment variables for the service'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
-        export CLIENT_ID=${{ secrets.CLIENT_ID }}
-        export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
-        export REDIRECT_URL=${{ vars.REDIRECT_URL }}
-        export SPREADSHEET_ID=${{ vars.SPREADSHEET_ID }}
+        export CLIENT_ID=$CLIENT_ID
+        export CLIENT_SECRET=$CLIENT_SECRET
+        export REDIRECT_URL=$REDIRECT_URL
+        export SPREADSHEET_ID=$SPREADSHEET_ID
         EOF
 
         # Check and set permissions for tokens.json if it exists
