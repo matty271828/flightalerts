@@ -14,8 +14,10 @@ type Server struct {
 }
 
 const (
-	CallBackURL   = "/callback"
-	ReadEmailsURL = "/reademails"
+	BaseURL = "/gf-emailparser"
+
+	CallBackURL   = BaseURL + "/callback"
+	ReadEmailsURL = BaseURL + "/reademails"
 )
 
 // NewServer is used to initialise a new instance of the server
