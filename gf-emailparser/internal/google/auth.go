@@ -19,6 +19,10 @@ var (
 	oauthState  string
 )
 
+const (
+	tokFile = "token.json"
+)
+
 func InitOAuth() (*oauth2.Config, error) {
 	// Retrieve environment variables
 	clientID := os.Getenv("CLIENT_ID")
@@ -76,7 +80,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = saveToken("token.json", token)
+	err = saveToken(tokFile, token)
 	if err != nil {
 		log.Printf("Failed to save OAuth2 token: %v\n", err)
 		http.Error(w, "Failed to save OAuth2 token", http.StatusInternalServerError)
@@ -89,7 +93,6 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 // GetClient returns an HTTP client based on OAuth 2.0 configuration and saved token.
 // It waits until the token file is available before proceeding.
 func GetClient(config *oauth2.Config) (*http.Client, error) {
-	tokFile := "token.json"
 	var tok *oauth2.Token
 
 	tok, err := tokenFromFile(tokFile)
@@ -175,4 +178,24 @@ func saveToken(path string, token *oauth2.Token) error {
 
 	log.Println("Token saved successfully")
 	return nil
+}
+
+// WaitForToken is used to block until a token has been received from OAuth2
+func WaitForToken(timeout time.Duration) error {
+	start := time.Now()
+	for {
+		if TokenExists(tokFile) {
+			return nil
+		}
+		if time.Since(start) > timeout {
+			return fmt.Errorf("timed out waiting for token")
+		}
+		time.Sleep(5 * time.Second) // Sleep for 10 seconds before checking again
+		log.Println("Waiting for token...")
+	}
+}
+
+func TokenExists(file string) bool {
+	_, err := os.Stat(file)
+	return !os.IsNotExist(err)
 }

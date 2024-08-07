@@ -3,6 +3,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/matty271828/flightalerts/gf-emailparser/internal/api"
 	internalGoogle "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
@@ -31,6 +32,11 @@ func main() {
 	// Use the client after manual OAuth authentication
 	client, err := internalGoogle.GetClient(oauthConfig)
 	if err != nil {
+		log.Fatalf("unable to get client: %v", err)
+	}
+
+	// Block until the token is available
+	if err := internalGoogle.WaitForToken(10 * time.Minute); err != nil {
 		log.Fatalf("unable to get client: %v", err)
 	}
 
