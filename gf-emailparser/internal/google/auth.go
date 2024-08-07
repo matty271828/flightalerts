@@ -131,6 +131,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	case err == nil:
 	case os.IsNotExist(err):
 		// File does not exist, return nil token
+		log.Println("nil token file")
 		return nil, nil
 	default:
 		log.Printf("Error opening token file: %v", err)
@@ -144,6 +145,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	case err == nil:
 	case err.Error() == "EOF":
 		// File is empty, return nil token
+		log.Println("nil token")
 		return nil, nil
 	default:
 		log.Printf("Error decoding token file: %v", err)
