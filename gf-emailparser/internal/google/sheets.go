@@ -90,6 +90,9 @@ func prepareFlightDataForSheet(data []FlightData) [][]interface{} {
 // flight_data sheet in Google Sheets.
 func (s *SheetsService) AppendFlightData(data []FlightData) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	if spreadsheetId == "" {
+		return fmt.Errorf("SPREADSHEET_ID is not set")
+	}
 	rangeToWrite := allFlights + "!A1" // Starting range, append will handle the rest
 
 	// Prepare the data for appending
@@ -124,6 +127,10 @@ func prepareMessageMetaDataForSheet(metaData *MessageMetaData) [][]interface{} {
 // to a sheet tracking previously read messages.
 func (s *SheetsService) MarkMessageAsRead(id string, internalDate string) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	if spreadsheetId == "" {
+		return fmt.Errorf("SPREADSHEET_ID is not set")
+	}
+
 	rangeToWrite := readMessages + "!A1" // Starting range, append will handle the rest
 
 	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
@@ -143,6 +150,10 @@ func (s *SheetsService) MarkMessageAsRead(id string, internalDate string) error 
 // runs we do not need to keep reading once we reach it.
 func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate string) error {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	if spreadsheetId == "" {
+		return fmt.Errorf("SPREADSHEET_ID is not set")
+	}
+
 	rangeToWrite := cutoff + "!A2"
 
 	metaData := MessageMetaData{ID: id, InternalDate: internalDate}
@@ -164,6 +175,10 @@ func (s *SheetsService) MarkMessageAsCutoff(id string, internalDate string) erro
 // point to stop reading previously read emails.
 func (s *SheetsService) GetCutoffMessageMetadata() (*MessageMetaData, error) {
 	spreadsheetId := os.Getenv("SPREADSHEET_ID")
+	if spreadsheetId == "" {
+		return nil, fmt.Errorf("SPREADSHEET_ID is not set")
+	}
+
 	rangeToRead := fmt.Sprintf("%s!A2:B2", cutoff) // Targeting the second row
 
 	resp, err := s.Service.Spreadsheets.Values.Get(spreadsheetId, rangeToRead).MajorDimension("ROWS").Do()
