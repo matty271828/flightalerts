@@ -52,21 +52,37 @@ func InitOAuth() (*oauth2.Config, error) {
 	return oauthConfig, nil
 }
 
+// HandleGoogleCallback handles the Google OAuth2 callback
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	log.Println("Handling Google callback")
-	if r.FormValue("state") != oauthState {
+	state := r.FormValue("state")
+	if state != oauthState {
+		log.Printf("Invalid OAuth state, expected '%s', got '%s'\n", oauthState, state)
 		http.Error(w, "State parameter doesn't match", http.StatusBadRequest)
 		return
 	}
 
 	code := r.FormValue("code")
+	if code == "" {
+		log.Println("Code parameter is missing")
+		http.Error(w, "Code parameter is missing", http.StatusBadRequest)
+		return
+	}
+
 	token, err := oauthConfig.Exchange(context.Background(), code)
 	if err != nil {
+		log.Printf("Code exchange failed: %v\n", err)
 		http.Error(w, "Code exchange failed", http.StatusInternalServerError)
 		return
 	}
 
-	saveToken("token.json", token)
+	err = saveToken("token.json", token)
+	if err != nil {
+		log.Printf("Failed to save OAuth2 token: %v\n", err)
+		http.Error(w, "Failed to save OAuth2 token", http.StatusInternalServerError)
+		return
+	}
+
 	fmt.Fprintf(w, "OAuth2 Token saved successfully")
 }
 
@@ -138,13 +154,23 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	return tok, nil
 }
 
-// saveToken saves the token to a file.
-func saveToken(path string, token *oauth2.Token) {
+// saveToken saves the token to a file
+func saveToken(path string, token *oauth2.Token) error {
 	log.Printf("Saving credential file to: %s\n", path)
 	f, err := os.Create(path)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		return fmt.Errorf("unable to create oauth token cache file: %v", err)
 	}
-	defer f.Close()
-	json.NewEncoder(f).Encode(token)
+	defer func() {
+		if cerr := f.Close(); cerr != nil {
+			log.Printf("Error closing file: %v\n", cerr)
+		}
+	}()
+
+	if err := json.NewEncoder(f).Encode(token); err != nil {
+		return fmt.Errorf("unable to encode oauth token to file: %v", err)
+	}
+
+	log.Println("Token saved successfully")
+	return nil
 }
