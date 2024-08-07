@@ -94,12 +94,26 @@ runs:
 
         # Upload the cron job file
         echo 'Uploading cron job file'
-        scp -o StrictHostKeyChecking=no ./cronjob.txt root@$DROPLET_IP:/root/gf-emailparser/cronjob.txt
+        scp -o StrictHostKeyChecking=no ./gf-emailparser/cronjob.txt root@$DROPLET_IP:/root/gf-emailparser/cronjob.txt
 
         # Install the cron job
         echo 'Installing cron job'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
+        # Check if cron is installed
+        if ! command -v crontab >/dev/null 2>&1; then
+            echo 'Cron is not installed. Installing...'
+            sudo apt-get update && sudo apt-get install -y cron
+        fi
+
+        # Check if cron service is running
+        if ! systemctl is-active --quiet cron; then
+            echo 'Cron service is not running. Starting...'
+            sudo systemctl start cron
+        fi
+
+        # Install the new cron job
         crontab /root/gf-emailparser/cronjob.txt
+        echo 'Cron job installed successfully'
         EOF
 
         # Enable and start the service
