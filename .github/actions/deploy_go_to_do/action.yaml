@@ -92,6 +92,16 @@ runs:
         fi
         EOF
 
+        # Upload the cron job file
+        echo 'Uploading cron job file'
+        scp -o StrictHostKeyChecking=no ./cronjob.txt root@$DROPLET_IP:/root/gf-emailparser/cronjob.txt
+
+        # Install the cron job
+        echo 'Installing cron job'
+        ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << 'EOF'
+        crontab /root/gf-emailparser/cronjob.txt
+        EOF
+
         # Enable and start the service
         echo 'Enabling and starting the service'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "
