@@ -29,7 +29,7 @@ runs:
       env:
         DROPLET_IP: ${{ inputs.droplet_ip }}
         CLIENT_ID: ${{ inputs.client_id }}
-        CLIENT_SECRET: ${{ inputs.client_id }}
+        CLIENT_SECRET: ${{ inputs.client_secret }}
         REDIRECT_URL: ${{ inputs.redirect_url }}
         SPREADSHEET_ID: ${{ inputs.spreadsheet_id }}
       run: |
