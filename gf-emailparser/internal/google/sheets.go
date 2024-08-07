@@ -93,18 +93,64 @@ func (s *SheetsService) AppendFlightData(data []FlightData) error {
 	if spreadsheetId == "" {
 		return fmt.Errorf("SPREADSHEET_ID is not set")
 	}
-	rangeToWrite := allFlights + "!A1" // Starting range, append will handle the rest
+
+	sheetId, err := s.getSheetId(spreadsheetId, allFlights)
+	if err != nil {
+		return fmt.Errorf("error converting string to int64: %v", err)
+	}
 
 	// Prepare the data for appending
 	values := prepareFlightDataForSheet(data)
 	vr := &sheets.ValueRange{Values: values}
 
-	_, err := s.Service.Spreadsheets.Values.Append(spreadsheetId, rangeToWrite, vr).ValueInputOption("RAW").InsertDataOption("INSERT_ROWS").Context(context.Background()).Do()
+	// Step 1: Insert empty rows at row 2 to make space for new data
+	_, err = s.Service.Spreadsheets.BatchUpdate(spreadsheetId, &sheets.BatchUpdateSpreadsheetRequest{
+		Requests: []*sheets.Request{
+			{
+				InsertDimension: &sheets.InsertDimensionRequest{
+					Range: &sheets.DimensionRange{
+						SheetId:    *sheetId,
+						Dimension:  "ROWS",
+						StartIndex: 1, // Zero-based index; StartIndex 1 means row 2
+						EndIndex:   int64(1 + len(values)),
+					},
+					InheritFromBefore: false,
+				},
+			},
+		},
+	}).Context(context.Background()).Do()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to insert rows: %v", err)
 	}
+
+	// Step 2: Write data to row 2
+	rangeToWrite := allFlights + "!A2"
+	_, err = s.Service.Spreadsheets.Values.Update(spreadsheetId, rangeToWrite, vr).
+		ValueInputOption("RAW").
+		Context(context.Background()).
+		Do()
+	if err != nil {
+		return fmt.Errorf("failed to update sheet: %v", err)
+	}
+
 	log.Println("Flight Data appended to sheet")
 	return nil
+}
+
+// Helper function to get the Sheet ID by name
+func (s *SheetsService) getSheetId(spreadsheetId string, sheetName string) (*int64, error) {
+	resp, err := s.Service.Spreadsheets.Get(spreadsheetId).Context(context.Background()).Do()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to get spreadsheet: %v", err)
+	}
+
+	for _, sheet := range resp.Sheets {
+		if sheet.Properties.Title == sheetName {
+			id := sheet.Properties.SheetId
+			return &id, nil
+		}
+	}
+	return nil, fmt.Errorf("Sheet %s not found", sheetName)
 }
 
 // MessageMetaData is a custom type used to serve metadata
