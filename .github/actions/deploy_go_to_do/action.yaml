@@ -40,9 +40,9 @@ runs:
         echo 'Setting environment variables for the service'
         ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << EOF
         echo "CLIENT_ID=$CLIENT_ID > /root/gf-emailparser/.env
-        echo "CLIENT_SECRET=$CLIENT_SECRET >> /root/gf-emailparser/.env
-        echo "REDIRECT_URL=$REDIRECT_URL >> /root/gf-emailparser/.env
-        echo "SPREADSHEET_ID=$SPREADSHEET_ID >> /root/gf-emailparser/.env
+        echo "CLIENT_SECRET=$CLIENT_SECRET > /root/gf-emailparser/.env
+        echo "REDIRECT_URL=$REDIRECT_URL > /root/gf-emailparser/.env
+        echo "SPREADSHEET_ID=$SPREADSHEET_ID > /root/gf-emailparser/.env
         EOF
 
         # Stop the service if it exists
