@@ -80,7 +80,7 @@ func (j *Jobs) ReadEmailsSubJob() error {
 		}
 
 		if i == 0 {
-			time.Sleep(1 * time.Second)
+			time.Sleep(2 * time.Second)
 			err = j.Gmail.Sheets.MarkMessageAsCutoff(id, internalDate)
 			if err != nil {
 				return fmt.Errorf("failed to mark message as cutoff: %v", err)
