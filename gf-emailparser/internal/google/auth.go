@@ -19,12 +19,28 @@ var (
 	oauthState  string
 )
 
-func InitOAuth() *oauth2.Config {
+func InitOAuth() (*oauth2.Config, error) {
+	// Retrieve environment variables
+	clientID := os.Getenv("CLIENT_ID")
+	clientSecret := os.Getenv("CLIENT_SECRET")
+	redirectURL := os.Getenv("REDIRECT_URL")
+
+	// Check for empty values
+	if clientID == "" {
+		return nil, fmt.Errorf("CLIENT_ID environment variable is not set")
+	}
+	if clientSecret == "" {
+		return nil, fmt.Errorf("CLIENT_SECRET environment variable is not set")
+	}
+	if redirectURL == "" {
+		return nil, fmt.Errorf("REDIRECT_URL environment variable is not set")
+	}
+
 	// Initialize OAuth
 	oauthConfig = &oauth2.Config{
-		ClientID:     os.Getenv("CLIENT_ID"),
-		ClientSecret: os.Getenv("CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("REDIRECT_URL"),
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
 		Endpoint:     google.Endpoint,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/gmail.readonly",
@@ -32,7 +48,8 @@ func InitOAuth() *oauth2.Config {
 		},
 	}
 	oauthState = "state-token" // This should be a random unique string in production
-	return oauthConfig
+
+	return oauthConfig, nil
 }
 
 func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {

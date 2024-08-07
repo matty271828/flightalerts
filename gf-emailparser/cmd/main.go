@@ -18,7 +18,10 @@ func main() {
 	}
 
 	// Initialise OAuth config
-	oauthConfig := internalGoogle.InitOAuth()
+	oauthConfig, err := internalGoogle.InitOAuth()
+	if err != nil {
+		log.Fatalf("error initialising oauth2 config: %v", err)
+	}
 
 	// Start the web server. A limited start is needed here in order to authenticate
 	// with google before retrieving the google client. Later we will initialise the
