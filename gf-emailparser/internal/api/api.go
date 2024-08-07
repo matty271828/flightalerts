@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	jobs "github.com/matty271828/flightalerts/gf-emailparser/internal/jobs"
@@ -22,6 +23,8 @@ func NewAPI(
 // respond is used to construct a header and write a response to an
 // endpoint call.
 func (a *API) respond(w http.ResponseWriter, statusCode int, message string) error {
+	log.Printf("ReadEmails API request accepted: %v", statusCode)
+
 	// Set the response status code to 202 Accepted
 	w.WriteHeader(statusCode)
 
