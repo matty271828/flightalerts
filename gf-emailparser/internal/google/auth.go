@@ -95,6 +95,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 func GetClient(config *oauth2.Config) (*http.Client, error) {
 	var tok *oauth2.Token
 
+	// Check if there is an existing token saved.
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		log.Printf("Error reading token from file: %v", err)
@@ -120,6 +121,24 @@ func GetClient(config *oauth2.Config) (*http.Client, error) {
 
 		log.Println("Token not found, waiting...")
 		time.Sleep(5 * time.Second) // Wait for 5 seconds before checking again
+	}
+
+	// Refresh the token if it has expired.
+	if tok.Expiry.Before(time.Now()) {
+		log.Println("Token expired, attempting to refresh")
+		tokSource := config.TokenSource(context.Background(), tok)
+		tok, err = tokSource.Token()
+		if err != nil {
+			log.Printf("Unable to refresh token: %v", err)
+			return nil, err
+		}
+
+		// Save the refreshed token
+		err = saveToken(tokFile, tok)
+		if err != nil {
+			log.Printf("Unable to save refreshed token: %v", err)
+			return nil, err
+		}
 	}
 
 	log.Println("Token successfully read from file")
