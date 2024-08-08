@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 
 def click_element(driver, xpath):
     """Clicks on the element specified by the given XPath."""
-    wait_time = 1
+    wait_time = 2
     try:
         element = driver.find_element(By.XPATH, xpath)
         element.click()
@@ -16,7 +16,7 @@ def click_element(driver, xpath):
 
 def enter_text(driver, xpath, text):
     """Enters the given text into the element specified by the given XPath."""
-    wait_time = 1
+    wait_time = 2
     try:
         element = driver.find_element(By.XPATH, xpath)
         element.clear()  # Clear any pre-existing text
