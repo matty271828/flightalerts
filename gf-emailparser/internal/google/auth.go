@@ -124,7 +124,7 @@ func GetClient(config *oauth2.Config) (*http.Client, error) {
 	}
 
 	// Refresh the token if it has expired.
-	if tok.Expiry.Before(time.Now()) {
+	if tok != nil && tok.Expiry.Before(time.Now()) {
 		log.Println("Token expired, attempting to refresh")
 		tokSource := config.TokenSource(context.Background(), tok)
 		tok, err = tokSource.Token()
