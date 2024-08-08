@@ -16,8 +16,9 @@ type Server struct {
 const (
 	BaseURL = "/gf-emailparser"
 
-	CallBackURL   = BaseURL + "/callback"
-	ReadEmailsURL = BaseURL + "/reademails"
+	CallBackURL     = BaseURL + "/callback"
+	ReadEmailsURL   = BaseURL + "/reademails"
+	RefreshTokenURL = BaseURL + "/refreshtoken"
 )
 
 // NewServer is used to initialise a new instance of the server
@@ -42,4 +43,5 @@ func Start() {
 // RegisterEndpoints is used to register endpoints onto the web server
 func (s *Server) RegisterEndpoints() {
 	http.HandleFunc(ReadEmailsURL, s.API.ReadEmails)
+	http.HandleFunc(RefreshTokenURL, s.API.RefreshToken)
 }

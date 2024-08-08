@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("unable to create Gmail service: %v", err)
 	}
 
-	jobs, err := jobs.NewJobs(gmail, sheets)
+	jobs, err := jobs.NewJobs(gmail, sheets, oauthConfig)
 	if err != nil {
 		log.Fatalf("unable to create Jobs service: %v", err)
 	}

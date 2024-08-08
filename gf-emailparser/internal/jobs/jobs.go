@@ -7,22 +7,38 @@ import (
 	"time"
 
 	google "github.com/matty271828/flightalerts/gf-emailparser/internal/google"
+	"golang.org/x/oauth2"
 )
 
 type Jobs struct {
+	Config *oauth2.Config
 	Gmail  *google.GmailService
 	Sheets *google.SheetsService
 	Wg     *sync.WaitGroup
 }
 
-func NewJobs(gmail *google.GmailService, sheets *google.SheetsService) (*Jobs, error) {
+func NewJobs(gmail *google.GmailService, sheets *google.SheetsService, config *oauth2.Config) (*Jobs, error) {
 	wg := sync.WaitGroup{}
 
 	return &Jobs{
+		Config: config,
 		Gmail:  gmail,
 		Sheets: sheets,
 		Wg:     &wg,
 	}, nil
+}
+
+// RefreshOauthTokenJob is a used to check if the oauth token has expired
+// and refresh it if it has.
+func (j *Jobs) RefreshTokenJob() error {
+	log.Println("RefreshOauthTokenJob requested.")
+
+	_, err := google.GetClient(j.Config)
+	if err != nil {
+		log.Println("RefreshOauthTokenJob failed.")
+	}
+
+	return nil
 }
 
 // ReadEmailsJob is used to access the gmail inbox, read all unread emails

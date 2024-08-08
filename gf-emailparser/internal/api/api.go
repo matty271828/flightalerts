@@ -46,3 +46,13 @@ func (a *API) ReadEmails(w http.ResponseWriter, r *http.Request) {
 
 	a.respond(w, http.StatusAccepted, "ReadEmails request accepted")
 }
+
+func (a *API) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling Token refresh")
+	err := a.Jobs.RefreshTokenJob()
+	if err != nil {
+		http.Error(w, "Failed to run RefreshTokenJob", http.StatusInternalServerError)
+	}
+
+	a.respond(w, http.StatusAccepted, "RefreshTokenJob request accepted")
+}

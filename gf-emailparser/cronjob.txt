@@ -1,1 +1,3 @@
 */10 * * * * /usr/bin/curl -s https://mindbrush.art/gf-emailparser/reademails > /dev/null
+
+*/30 * * * * /usr/bin/curl -s https://mindbrush.art/gf-emailparser/refreshtoken > /dev/null

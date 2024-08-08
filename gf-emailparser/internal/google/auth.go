@@ -123,26 +123,38 @@ func GetClient(config *oauth2.Config) (*http.Client, error) {
 		time.Sleep(5 * time.Second) // Wait for 5 seconds before checking again
 	}
 
-	// Refresh the token if it has expired.
-	if tok != nil && tok.Expiry.Before(time.Now()) {
-		log.Println("Token expired, attempting to refresh")
-		tokSource := config.TokenSource(context.Background(), tok)
-		tok, err = tokSource.Token()
+	if tok != nil {
+		err = RefreshToken(tok, config)
 		if err != nil {
-			log.Printf("Unable to refresh token: %v", err)
-			return nil, err
-		}
-
-		// Save the refreshed token
-		err = saveToken(tokFile, tok)
-		if err != nil {
-			log.Printf("Unable to save refreshed token: %v", err)
+			log.Printf("error refreshing token: %v", err)
 			return nil, err
 		}
 	}
 
 	log.Println("Token successfully read from file")
 	return config.Client(context.Background(), tok), nil
+}
+
+// RefreshToken is used to refresh an oauth2 token once it has expired.
+func RefreshToken(tok *oauth2.Token, config *oauth2.Config) error {
+	// Refresh the token if it has expired.
+	if tok.Expiry.Before(time.Now()) {
+		log.Println("Token expired, attempting to refresh")
+		tokSource := config.TokenSource(context.Background(), tok)
+		tok, err := tokSource.Token()
+		if err != nil {
+			log.Printf("Unable to refresh token: %v", err)
+			return err
+		}
+
+		// Save the refreshed token
+		err = saveToken(tokFile, tok)
+		if err != nil {
+			log.Printf("Unable to save refreshed token: %v", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // tokenFromFile reads a token from a file.
